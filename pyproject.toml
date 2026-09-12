@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "specmd"
-version = "0.2.0"
+version = "0.4.0"
 description = "specmd: author, validate, inspect, render, and trace SPEC.md documents (MVP subset)"
 readme = "README.md"
 license = {text = "Apache-2.0"}

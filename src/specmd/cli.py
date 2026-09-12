@@ -9,7 +9,7 @@ import json
 import sys
 from pathlib import Path
 
-from specmd import __version__, exit_codes
+from specmd import __version__, exit_codes, host_agent
 from specmd.cognitive import AUTO, OFF, REQUIRED, VALID_MODES
 from specmd.commands import adapt as cmd_adapt
 from specmd.commands import blackbox as cmd_blackbox
@@ -83,6 +83,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_blackbox = sub.add_parser("blackbox")
     p_blackbox.add_argument("input", nargs="?", default=None)
     p_blackbox.add_argument("--trace", default="auto")
+    p_blackbox.add_argument("--cognitive", choices=VALID_MODES, default=AUTO)
+    p_blackbox.add_argument("--cognitive-input", default=None)
     p_blackbox.add_argument("--export", default=None)
 
     p_test = sub.add_parser("test")
@@ -277,13 +279,23 @@ def main(argv: list[str] | None = None) -> int:
             export_path = Path(args.export) if args.export else None
             if export_path and not export_path.is_absolute():
                 export_path = cwd / export_path
-            envelope, code = cmd_blackbox.run(
-                root_spec_path=resolved.path,
-                set_root=set_root,
-                display_path=disp,
-                trace_mode=args.trace,
-                export_path=export_path,
-            )
+            try:
+                cognitive_input = None
+                if args.cognitive_input:
+                    stdin_text = sys.stdin.read() if args.cognitive_input == "-" else None
+                    cognitive_input = host_agent.load_cognitive_input(args.cognitive_input, stdin_text)
+                envelope, code = cmd_blackbox.run(
+                    root_spec_path=resolved.path,
+                    set_root=set_root,
+                    display_path=disp,
+                    trace_mode=args.trace,
+                    cognitive_mode=args.cognitive,
+                    cognitive_input=cognitive_input,
+                    export_path=export_path,
+                )
+            except host_agent.HostAgentInputError as exc:
+                print(f"usage error: {exc}", file=sys.stderr)
+                return exit_codes.USAGE_ERROR
         else:  # test
             export_path = Path(args.export) if args.export else None
             if export_path and not export_path.is_absolute():

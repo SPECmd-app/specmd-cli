@@ -1,6 +1,6 @@
 ---
 spec_module: "cli-icd"
-part_of_spec: "0.12.1"
+part_of_spec: "0.13.0"
 status: draft
 name: "specmd CLI Interface Control Document"
 last_updated: "2026-09-12"
@@ -8,7 +8,7 @@ last_updated: "2026-09-12"
 
 # specmd CLI Interface Control Document
 
-This document is a Normative Module of `SPEC.md` version `0.12.1`.
+This document is a Normative Module of `SPEC.md` version `0.13.0`.
 
 Uppercase **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** use BCP 14 semantics. The Root Specification controls interpretation and precedence.
 
@@ -255,6 +255,16 @@ The default is `auto` for `init`, `inspect`, `blackbox`, `trace create`, and `tr
 - **ICD-REV-007:** Under `required`, any unavailable, timed-out, invalid, or incomplete selected reviewer MUST make the cognitive result incomplete and return exit status `4`.
 - **ICD-REV-008:** Human-readable and JSON output MUST identify requested, completed, and failed reviewers and preserve finding origins and material disagreements.
 
+### 7.2 Host-Agent Cognitive Input
+
+Host-Agent Mode (SPECMD_AGENT_INTEGRATIONS.md COG-001) needs no configured Cognitive Provider and makes no outbound network call: the coding agent already invoking the tool supplies semantic analysis directly. A command that offers a `cognitive_package` (currently `blackbox`) accepts that analysis back via `--cognitive-input <path|->` (a JSON file, or `-` for standard input) on the CLI, or the `cognitive_input` argument (an inline object) on a structured tool interface such as MCP.
+
+- **ICD-HOSTIN-001:** `--cognitive-input`/`cognitive_input` MUST be rejected with exit status `2` when combined with effective cognitive mode `off`, for the same reason `--reviewer` is (ICD-REV-003): it would otherwise be ignored.
+- **ICD-HOSTIN-002:** A malformed payload (invalid JSON, wrong top-level type, or a missing required field on an entry) MUST be rejected with exit status `2` and MUST NOT be partially applied.
+- **ICD-HOSTIN-003:** A well-formed entry that cites an identifier (e.g. a requirement ID) the tool cannot verify against material it already extracted deterministically MUST have that specific citation dropped and reported; the rest of the entry MUST be preserved (mirrors PROV-009: a partial problem must not erase results that are still good).
+- **ICD-HOSTIN-004:** When accepted, the JSON `cognitive` block's `used` value MUST read `host-agent`, distinguishing it from Direct-Provider Mode's provider-identifying values (PROV-007) and from `none`.
+- **ICD-HOSTIN-005:** `complete` MUST reflect whether the supplied analysis covers every element the tool identified as needing it; under `--cognitive required`, incomplete coverage MUST return exit status `4` (COG-009), listing what remains uncovered.
+
 ## 8. Command Contracts
 
 ### 8.1 `init`
@@ -347,6 +357,7 @@ The command is read-only, requires no Specification Set, and MUST support JSON. 
 - **ICD-BBX-002:** `--export` MUST produce a tool-neutral structured report and MUST NOT convert heuristic or trace-derived information into normative facts.
 - **ICD-BBX-003:** Black-box output MUST represent specification completeness, trace coverage, implementation-reference completeness, and verification-evidence completeness as separate result dimensions.
 - **ICD-BBX-004:** Reviewer options on `blackbox` MUST follow the Additional Reviewer Options contract and MUST preserve reviewer provenance for inferred gaps and proposed additions.
+- **ICD-BBX-005:** When effective cognitive mode is not `off` and no `--cognitive-input` is supplied, output MUST include a bounded `cognitive_package` (Section 7.2) built from the resolved Root Specification's own material, never the whole repository.
 
 ### 8.11 `cucumber`
 

@@ -1,7 +1,7 @@
 ---
 specmd_trace: "0.4.0"
 traces_file: "SPEC.md"
-traces_spec: "0.12.1"
+traces_spec: "0.13.0"
 status: draft
 name: "specmd Tool Traceability"
 last_updated: "2026-09-12"
@@ -11,7 +11,7 @@ last_updated: "2026-09-12"
 
 ## Purpose
 
-This informative companion maps the Specification Set rooted at `SPEC.md` version `0.12.1` to logical design areas and planned verification evidence.
+This informative companion maps the Specification Set rooted at `SPEC.md` version `0.13.0` to logical design areas and planned verification evidence.
 
 The normative specification remains authoritative. This document does not add, remove, or reinterpret required behavior.
 
@@ -73,7 +73,7 @@ Verification methods use:
 | TRACEGEN-009, TRACEGEN-010 | Trace reconciler | T, I | Add, retain, remove, and manual-content preservation fixtures | src/specmd/commands/trace.py (tests/test_trace.py) |
 | TRACEGEN-011, TRACEGEN-012, TRACEGEN-013 | Pair-validation, safe-write, and default-path integration | T | Post-generation pair, failure-integrity, and adjacent-update fixtures | src/specmd/commands/trace.py, src/specmd/trace_pair.py (tests/test_trace.py) |
 | INTG-001, INTG-002, INTG-003, INTG-004, INTG-005 | Tool-neutral and capability-discovery integration | T, I | CLI/JSON parity, discovery, custom-path, and caller-equivalence fixtures | TBD |
-| COG-001, COG-002, COG-003, COG-004, COG-005 | Cognitive mode and result separation | T, I | Host/direct/off mode and result-label fixtures | TBD |
+| COG-001, COG-002, COG-003, COG-004, COG-005 | Cognitive mode and result separation | T, I | Host/direct/off mode and result-label fixtures | src/specmd/host_agent.py, src/specmd/commands/blackbox.py (tests/test_host_agent.py, tests/test_blackbox.py) — Host-Agent Mode branch of COG-001 implemented for `blackbox` (SPECMD_CLI_ICD.md section 7.2); Direct-Provider Mode / PROV-001..009 remain TBD, out of scope |
 | COG-006, COG-007, COG-008, COG-009 | Cognitive authority and failure boundaries | T, A | No-invention, proposal, evidence, and provider-failure fixtures | TBD |
 | AGENT-001, AGENT-002, AGENT-003 | Coding-agent capability and patch boundary | T, I | Operation availability and propose/apply authorization fixtures | TBD |
 | AGENT-004, AGENT-005, AGENT-006, AGENT-007 | Living-spec agent instructions and authority | T, I | Adapter content and conflict fixtures | TBD |
@@ -93,10 +93,11 @@ Verification methods use:
 | ICD-GEN-001, ICD-GEN-002, ICD-GEN-003, ICD-GEN-004, ICD-GEN-005 | CLI grammar and interaction rules | T | Invalid, ignored, stdin, and non-interactive fixtures | TBD |
 | ICD-IN-001, ICD-IN-002, ICD-IN-003, ICD-IN-004, ICD-IN-005, ICD-IN-006 | CLI input and path resolution | T, I | Explicit/default/custom/no-guess and path-display fixtures | src/specmd/resolver.py (tests/test_validate.py) |
 | ICD-OUT-001, ICD-OUT-002, ICD-OUT-003, ICD-OUT-004, ICD-OUT-005, ICD-OUT-006 | CLI output and safe-write behavior | T, A | Authorization, atomicity, failure-state, and read-only fixtures | src/specmd/writer.py (tests/test_init.py, tests/test_render.py) |
-| ICD-COG-001, ICD-COG-002, ICD-COG-003 | CLI cognitive-mode behavior | T | Label, requested/used, and disabled-provider fixtures | src/specmd/cognitive.py (tests/test_inspect.py) |
+| ICD-COG-001, ICD-COG-002, ICD-COG-003 | CLI cognitive-mode behavior | T | Label, requested/used, and disabled-provider fixtures | src/specmd/cognitive.py (tests/test_inspect.py, tests/test_blackbox.py) — blackbox now negotiates `--cognitive` (default `auto`, per ICD §7) instead of hardcoding `off`/`none` |
 | ICD-REV-001, ICD-REV-002, ICD-REV-003 | Reviewer option parser and applicability rules | T | Exact, duplicate, missing-reviewer, and cognitive-off fixtures | TBD |
 | ICD-REV-004, ICD-REV-005, ICD-REV-006, ICD-REV-007, ICD-REV-008 | Reviewer orchestration and policy result mapper | T, I | Authorization, order-independence, policy, and provenance fixtures | TBD |
-| ICD-BBX-001, ICD-BBX-002, ICD-BBX-003, ICD-BBX-004 | Black-box CLI and result contract | T, I | Trace-mode, export, result-dimension, and reviewer-provenance fixtures | TBD |
+| ICD-BBX-001, ICD-BBX-002, ICD-BBX-003, ICD-BBX-004, ICD-BBX-005 | Black-box CLI and result contract | T, I | Trace-mode, export, result-dimension, reviewer-provenance, and cognitive-package fixtures | src/specmd/commands/blackbox.py (tests/test_blackbox.py) — ICD-BBX-001/002/003/005 covered; ICD-BBX-004 (`--reviewer` on blackbox) remains TBD, out of scope of this change |
+| ICD-HOSTIN-001, ICD-HOSTIN-002, ICD-HOSTIN-003, ICD-HOSTIN-004, ICD-HOSTIN-005 | Host-Agent cognitive input contract | T, I | Cognitive-off conflict, malformed-payload, citation-rejection, used-value, and coverage fixtures | src/specmd/host_agent.py, src/specmd/commands/blackbox.py, src/specmd/cli.py, src/specmd/mcp_server.py (tests/test_host_agent.py, tests/test_blackbox.py, tests/test_mcp_server.py) |
 | ICD-CUKE-001, ICD-CUKE-002, ICD-CUKE-003, ICD-CUKE-004, ICD-CUKE-005 | Cucumber CLI routing and execution boundary | T, A | Exact target, export, no-execution, explicit-run, and trusted-config fixtures | TBD |
 | ICD-CUKE-006, ICD-CUKE-007, ICD-CUKE-008, ICD-CUKE-009, ICD-CUKE-010 | Cucumber status, import, disclosure, and process controls | T, I | Exit, trace-update, JSON, disclosure, timeout, and cancellation fixtures | TBD |
 | ICD-SRC-001, ICD-SRC-002, ICD-SRC-003, ICD-SRC-004, ICD-SRC-005, ICD-SRC-006, ICD-SRC-007 | Common standards-source CLI options | T, I | Auto, repository, local, explicit-file, offline, conflict, and provenance fixtures | TBD |
@@ -119,7 +120,7 @@ Verification methods use:
 | TEST-001, TEST-002, TEST-003 | Verification coverage analyzer | T | Covered, uncovered, and orphan acceptance fixtures | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
 | TEST-004 | Tool-neutral test-plan exporter | T, I | Export schema and content fixture | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
 | TEST-005, TEST-006, TEST-007 | Implementation-test boundary | T, A | Non-execution, explicit-integration, and claim-label fixtures | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
-| BBX-001, BBX-002, BBX-003, BBX-004, BBX-005 | Black-box contract analyzer | T, A | Interface inventory, gap, ambiguity, and evidence-label corpus | TBD |
+| BBX-001, BBX-002, BBX-003, BBX-004, BBX-005 | Black-box contract analyzer | T, A | Interface inventory, gap, ambiguity, and evidence-label corpus | src/specmd/commands/blackbox.py, src/specmd/host_agent.py (tests/test_blackbox.py, tests/test_host_agent.py) — BBX-002 also covers the named interface-element inventory (heading-based, under `interface_elements`); BBX-002/003 covered deterministically by interface-section inventory and the actor<->operation cross-reference (`evidence_type=deterministic`; only recognizes the bold-labeled-bullet convention and reports at `information` severity, since text matching alone cannot tell an actor from a same-convention data entity — verified, and an earlier unbolded-bullet variant's false positives fixed, against SPECmd-app/spec-md-examples's internal-it-ticketing-system at commit 5751f95); BBX-004/005's interface I/O facilitation drafting and requirements<->interface cross-mapping checks are reachable via Host-Agent Mode (`--cognitive-input`) — verified end-to-end against this project's own SPEC.md and against the ticketing example, including a deliberately hallucinated requirement-ID citation being dropped and reported rather than trusted; without `--cognitive-input` they report themselves as not yet performed and include a `cognitive_package` rather than fabricating a result |
 | BBX-006, BBX-007, BBX-008, BBX-009, BBX-010 | Trace-aware black-box correlator | T, I | Trace present, absent, conflicting, and four-dimension result fixtures | src/specmd/commands/blackbox.py, src/specmd/trace_pair.py (tests/test_blackbox.py) — BBX-007 correlation is at requirement-ID granularity, not per-interface-element |
 | BBX-011, BBX-012 | Black-box exporter and execution boundary | T, I | Tool-neutral export and no-runtime-execution fixtures | src/specmd/commands/blackbox.py (tests/test_blackbox.py) |
 | ADAPT-001 | Adapter registry and generator | T | Supported-target generation fixtures | src/specmd/commands/adapt.py (tests/test_adapt.py) |

@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any
 
 from specmd import __version__ as TOOL_VERSION
-from specmd import module_resolver, structural, trace_pair
+from specmd import host_agent, module_resolver, structural, trace_pair
 from specmd.commands import blackbox as cmd_blackbox
 from specmd.commands import capabilities as cmd_capabilities
 from specmd.commands import init as cmd_init
@@ -113,13 +113,18 @@ def _tool_blackbox(args: dict) -> dict:
     if not root.exists():
         return _text_result({"error": f"'{root}' does not exist"}, is_error=True)
     export = args.get("export")
-    envelope, _exit = cmd_blackbox.run(
-        root_spec_path=root,
-        set_root=set_root,
-        display_path=disp,
-        trace_mode=args.get("trace", "auto"),
-        export_path=Path(export).resolve() if export else None,
-    )
+    try:
+        envelope, _exit = cmd_blackbox.run(
+            root_spec_path=root,
+            set_root=set_root,
+            display_path=disp,
+            trace_mode=args.get("trace", "auto"),
+            cognitive_mode=args.get("cognitive", "auto"),
+            cognitive_input=args.get("cognitive_input"),
+            export_path=Path(export).resolve() if export else None,
+        )
+    except host_agent.HostAgentInputError as exc:
+        return _text_result({"error": str(exc)}, is_error=True)
     return _text_result(envelope, is_error=envelope["status"] in ("failed", "indeterminate"))
 
 
@@ -261,7 +266,12 @@ TOOLS: dict[str, dict[str, Any]] = {
         },
     },
     "blackbox": {
-        "description": "Deterministic, outside-in Black-Box Contract inventory. May write a report if 'export' is given.",
+        "description": (
+            "Outside-in Black-Box Contract inventory. Structural checks are deterministic. The two semantic "
+            "checks (interface I/O facilitation, requirements<->interface cross-mapping) use Host-Agent Mode: "
+            "call once to receive a 'cognitive_package' in the results, reason over it yourself, then call again "
+            "with 'cognitive_input' set to your structured findings. May write a report if 'export' is given."
+        ),
         "read_only": False,
         "handler": _tool_blackbox,
         "input_schema": {
@@ -269,6 +279,14 @@ TOOLS: dict[str, dict[str, Any]] = {
             "properties": {
                 "root_spec": {"type": "string", "default": "SPEC.md"},
                 "trace": {"type": "string", "default": "auto"},
+                "cognitive": {"type": "string", "enum": ["off", "auto", "required"], "default": "auto"},
+                "cognitive_input": {
+                    "type": "object",
+                    "description": (
+                        "Structured Host-Agent findings matching the response_contract from a prior call's "
+                        "cognitive_package. Invalid together with cognitive: off."
+                    ),
+                },
                 "export": {"type": "string", "description": "optional path to write a JSON report to"},
             },
         },

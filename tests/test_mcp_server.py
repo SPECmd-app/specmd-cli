@@ -106,6 +106,39 @@ def test_validate_pair_aligned_on_optional_trace_fixture(tmp_fixture):
     assert resp["result"]["isError"] is False
 
 
+def test_blackbox_tool_accepts_inline_cognitive_input(tmp_fixture):
+    d = tmp_fixture("blackbox_host_agent")
+    findings = {
+        "interfaces": [
+            {
+                "interface": "Web Portal",
+                "supporting_requirement_ids": ["TICKET-001"],
+                "gaps": [],
+                "confidence": "medium",
+            }
+        ],
+    }
+    resp = _call(
+        "blackbox",
+        {"root_spec": str(d / "SPEC.md"), "trace": "none", "cognitive": "auto", "cognitive_input": findings},
+    )
+    payload = json.loads(resp["result"]["content"][0]["text"])
+    assert resp["result"]["isError"] is False
+    assert payload["cognitive"]["used"] == "host-agent"
+    comp = payload["results"]["completeness"]["specification_completeness"]
+    assert "Web Portal" in comp["io_facilitation_drafts"]
+    assert "cognitive_package" not in comp
+
+
+def test_blackbox_tool_rejects_cognitive_input_with_cognitive_off(tmp_fixture):
+    d = tmp_fixture("blackbox_host_agent")
+    resp = _call(
+        "blackbox",
+        {"root_spec": str(d / "SPEC.md"), "trace": "none", "cognitive": "off", "cognitive_input": {"interfaces": []}},
+    )
+    assert resp["result"]["isError"] is True
+
+
 def test_propose_patch_is_honest_stub():
     resp = _call("propose_patch")
     assert resp["result"]["isError"] is True

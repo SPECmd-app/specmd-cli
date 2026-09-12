@@ -122,7 +122,14 @@ COMMANDS: list[CommandInfo] = [
         network=False,
         executes_code=False,
         available=True,
-        options=[OptionInfo("--trace", "auto"), OptionInfo("--export", "", "write a JSON report to this path")],
+        options=[
+            OptionInfo("--trace", "auto"),
+            OptionInfo("--cognitive", "auto", "off, auto, or required (no Direct-Provider in this build; see Host-Agent Mode)"),
+            OptionInfo(
+                "--cognitive-input", "", "path (or '-' for stdin) to a Host-Agent findings JSON file; invalid with --cognitive off"
+            ),
+            OptionInfo("--export", "", "write a JSON report to this path"),
+        ],
     ),
     CommandInfo(
         name="test",

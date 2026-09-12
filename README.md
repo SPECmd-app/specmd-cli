@@ -19,9 +19,24 @@ Implemented:
   true declared version, whatever it is.
 - `specmd trace create` / `specmd trace update` — generate and reconcile
   `TRACE.md`; also apply the Version Alignment Process.
-- `specmd blackbox` — read-only, deterministic Black-Box Contract inventory
-  (structural only — no semantic inference, since no Cognitive Provider is
-  configured). `--export` writes a JSON report.
+- `specmd blackbox` — read-only Black-Box Contract inventory. Structural
+  checks (interface-section inventory, named interface-element inventory,
+  actor<->operation cross-reference) are fully deterministic.
+  `--cognitive off|auto|required` (default `auto`, per the CLI ICD) is
+  negotiated the same way `validate`/`inspect` do. The two genuinely
+  semantic checks (interface I/O facilitation drafting, requirements
+  <->interface cross-mapping) run via **Host-Agent Mode** (COG-001,
+  [SPECMD_CLI_ICD.md](SPECMD_CLI_ICD.md) section 7.2) — no Direct-Provider
+  Mode exists in this build (no credentials, no outbound network call
+  anywhere on the path), so instead a call with no `--cognitive-input`
+  returns a bounded `cognitive_package`; the calling agent reasons over it
+  and resupplies the command with `--cognitive-input` (a file path, or `-`
+  for stdin) or the `cognitive_input` MCP argument. Every requirement-ID
+  citation in that
+  input is checked against IDs this tool already extracted deterministically
+  — an unrecognized citation is dropped and reported (never silently
+  trusted), and the rest of the entry is kept. `--export` writes a JSON
+  report.
 - `specmd test` — verification-coverage report (covered/uncovered
   requirement IDs, unreferenced acceptance criteria). `--export` writes a
   JSON test plan; fields that would require semantic extraction
@@ -52,8 +67,9 @@ Implemented:
   capability exists in this build, so it always returns an error rather than
   fabricate a diff. Run it as `specmd-mcp` (installed entry point) or
   `python -m specmd.mcp_server`.
-- Deterministic-Only Mode (`--cognitive off|auto|required` is negotiated
-  truthfully; no Cognitive Provider or Reviewer Agent is implemented).
+- Deterministic-Only Mode by default (`--cognitive off|auto|required` is
+  negotiated truthfully); `blackbox` additionally supports **Host-Agent
+  Mode** (no Direct-Provider Mode or Reviewer Agent is implemented).
 
 **Known gaps, disclosed rather than silently claimed:**
 - `specmd --help`/`-h` is still argparse's native (low-fidelity) output; it
@@ -62,14 +78,30 @@ Implemented:
 - `specmd help`'s per-command detail doesn't print a full command-syntax
   grammar line or example invocations (HELP-001/HELP-005) — it lists
   options/defaults/safety markers instead.
-- `blackbox`'s inventory is ID- and section-presence-level, not a full
-  actor/trigger/input/output/error/state-effect extraction (would need
-  semantic understanding this Deterministic-Only build doesn't have).
+- `blackbox`'s deterministic checks are ID-, section-presence-, named-
+  interface-element-, and actor-mention-level, not a full
+  trigger/input/output/error/state-effect extraction. The actor-mention
+  check only recognizes one convention (`- **Name**: ...`/`- **Name** —
+  ...`) and, being text matching rather than semantic understanding, cannot
+  tell a person/system actor from a same-convention data entity — its
+  findings say so explicitly and are reported at `information` severity
+  rather than asserted as a confident gap. The two checks that need real
+  semantic understanding (interface I/O facilitation drafting,
+  requirements<->interface cross-mapping) run only when the calling agent
+  supplies `--cognitive-input` (Host-Agent Mode); without it, a call
+  returns a `cognitive_package` and reports the checks as not yet
+  performed rather than fabricating a result. Citation-verification is
+  mechanical (ID must exist in what was already extracted deterministically)
+  — it cannot verify that the reasoning *content* itself is correct, only
+  that it isn't inventing IDs. The `cognitive_package` also excludes
+  Normative Module content (root spec only), which it discloses in-band
+  rather than silently omitting.
 
 Not implemented at all (left `TBD`/unclaimed in [TRACE.md](TRACE.md), not
 silently assumed): `standards fetch` and any network access, the Cucumber
-connector family, Direct-Provider/Host-Agent cognitive modes, and Reviewer
-Agents.
+connector family, Direct-Provider Mode (`PROV-001..009`: no credentials, no
+outbound network call anywhere in this build), and Reviewer Agents.
+Host-Agent Mode is implemented for `blackbox` only.
 
 ## Core/Optional profile: reconciled against the authoritative standard
 
