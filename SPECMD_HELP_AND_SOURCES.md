@@ -1,6 +1,6 @@
 ---
 spec_module: "help-and-standards-sources"
-part_of_spec: "0.12.0"
+part_of_spec: "0.12.1"
 status: draft
 name: "specmd Help and Standards Sources Contract"
 last_updated: "2026-09-12"
@@ -8,7 +8,7 @@ last_updated: "2026-09-12"
 
 # specmd Help and Standards Sources Contract
 
-This document is a Normative Module of `SPEC.md` version `0.12.0`.
+This document is a Normative Module of `SPEC.md` version `0.12.1`.
 
 Uppercase **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** use BCP 14 semantics. The Root Specification controls interpretation and precedence.
 

@@ -16,8 +16,10 @@ def run() -> tuple[dict, int]:
         "tool_version": TOOL_VERSION,
         "cli_icd_version": CLI_ICD_VERSION,
         "json_schema_version": "1.1.0",
-        "core_versions_supported": [core_profile.CORE_VERSION],
-        "optional_versions_supported": [core_profile.OPTIONAL_VERSION],
+        "core_versions_supported": list(core_profile.SUPPORTED_CORE_VERSIONS),
+        "optional_versions_supported": list(core_profile.SUPPORTED_OPTIONAL_VERSIONS),
+        "latest_core_version": core_profile.CORE_VERSION,
+        "latest_optional_version": core_profile.OPTIONAL_VERSION,
         "core_profile_provenance": core_profile.PROFILE_PROVENANCE,
         "commands": [
             {

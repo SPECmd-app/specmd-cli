@@ -14,14 +14,25 @@ def test_standards_list_reports_bundled_versions(capsys):
     envelope, code = _run_json(capsys, ["standards", "list"])
     assert code == exit_codes.SUCCESS
     versions = envelope["results"]["versions"]
-    assert {"kind": "core", "version": "0.4.2", "source": "bundled_local", "channel": "stable"} in versions
+    by_version = {(v["kind"], v["version"]): v for v in versions}
+    assert by_version[("core", "0.4.2")]["latest"] is False
+    assert by_version[("core", "0.4.3")]["latest"] is True
+    assert by_version[("optional", "0.4.2")]["source"] == "bundled_local"
+    assert by_version[("optional", "0.4.3")]["channel"] == "stable"
 
 
 def test_standards_show_latest_resolves_to_exact_version(capsys):
     envelope, code = _run_json(capsys, ["standards", "show", "core", "latest"])
     assert code == exit_codes.SUCCESS
-    assert envelope["results"]["resolved_version"] == "0.4.2"
+    assert envelope["results"]["resolved_version"] == "0.4.3"
     assert envelope["inputs"]["version"] == "latest"  # what was requested is still recorded
+
+
+def test_standards_show_older_supported_version_still_works(capsys):
+    envelope, code = _run_json(capsys, ["standards", "show", "core", "0.4.2"])
+    assert code == exit_codes.SUCCESS
+    assert envelope["results"]["resolved_version"] == "0.4.2"
+    assert envelope["results"]["is_latest"] is False
 
 
 def test_standards_show_unavailable_version_no_fallback(capsys):

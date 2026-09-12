@@ -1,7 +1,7 @@
 ---
-specmd: "0.4.2"
-specmd_optional: "0.4.2"
-spec_version: "0.12.0"
+specmd: "0.4.3"
+specmd_optional: "0.4.3"
+spec_version: "0.12.1"
 status: draft
 name: "specmd Tool"
 last_updated: "2026-09-12"

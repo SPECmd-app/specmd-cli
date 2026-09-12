@@ -68,16 +68,17 @@ def analyze(path: Path, requested_profile: str) -> StructuralReport:
     declared_features_map = frontmatter.get("optional_features") if isinstance(frontmatter, dict) else None
     declared_features = list(declared_features_map.keys()) if isinstance(declared_features_map, dict) else []
 
-    core_version_resolved = declared_core_version == core_profile.CORE_VERSION
+    core_version_resolved = declared_core_version in core_profile.SUPPORTED_CORE_VERSIONS
     if declared_core_version is None:
         findings.append(_finding("CORE-VAL-006", SEVERITY_ERROR, "frontmatter is missing required field 'specmd'", file_label, 1))
     elif not core_version_resolved:
+        supported = ", ".join(core_profile.SUPPORTED_CORE_VERSIONS)
         findings.append(
             _finding(
                 "CORE-VAL-006",
                 SEVERITY_ERROR,
                 f"declared Core version '{declared_core_version}' is not locally resolvable; "
-                f"this build only has evidence for Core {core_profile.CORE_VERSION}",
+                f"this build only has evidence for Core version(s) {supported}",
                 file_label,
                 1,
             )
@@ -106,14 +107,15 @@ def analyze(path: Path, requested_profile: str) -> StructuralReport:
             )
             optional_version_resolved = False
         else:
-            optional_version_resolved = declared_optional_version == core_profile.OPTIONAL_VERSION
+            optional_version_resolved = declared_optional_version in core_profile.SUPPORTED_OPTIONAL_VERSIONS
             if not optional_version_resolved:
+                supported = ", ".join(core_profile.SUPPORTED_OPTIONAL_VERSIONS)
                 findings.append(
                     _finding(
                         "CORE-VAL-016",
                         SEVERITY_ERROR,
                         f"declared Optional version '{declared_optional_version}' is not locally resolvable; "
-                        f"this build only has evidence for Optional {core_profile.OPTIONAL_VERSION}",
+                        f"this build only has evidence for Optional version(s) {supported}",
                         file_label,
                         1,
                     )
@@ -266,14 +268,16 @@ def version_alignment_finding(report: StructuralReport, file_label: str) -> Find
             1,
         )
     if not report.core_version_resolved:
+        supported = ", ".join(core_profile.SUPPORTED_CORE_VERSIONS)
         return make_finding(
             "PORT-008",
             SEVERITY_ERROR,
             f"Declared Core version '{report.declared_core_version}' cannot be resolved in this build "
-            f"(only Core {core_profile.CORE_VERSION} is available) (PORT-007). Suggested first remediation: "
-            f"propose updating this document's declared 'specmd' version to '{core_profile.CORE_VERSION}' as "
-            "a Specification Set change if that is an accurate reflection of intent, or supply/register the "
-            f"exact Core {report.declared_core_version} standards document before re-running evaluation. Do "
+            f"(only Core version(s) {supported} are available) (PORT-007). Suggested first remediation: "
+            f"propose updating this document's declared 'specmd' version to '{core_profile.CORE_VERSION}' "
+            f"(the latest supported) or another of {supported} as a Specification Set change if that is an "
+            "accurate reflection of intent, or supply/register the exact "
+            f"Core {report.declared_core_version} standards document before re-running evaluation. Do "
             "not silently substitute a different resolved version (PORT-006).",
             file_label,
             1,
@@ -283,13 +287,15 @@ def version_alignment_finding(report: StructuralReport, file_label: str) -> Find
         and report.optional_version_resolved is False
         and report.declared_optional_version
     ):
+        supported = ", ".join(core_profile.SUPPORTED_OPTIONAL_VERSIONS)
         return make_finding(
             "PORT-008",
             SEVERITY_ERROR,
             f"Declared Optional version '{report.declared_optional_version}' cannot be resolved in this "
-            f"build (only Optional {core_profile.OPTIONAL_VERSION} is available) (PORT-007). Suggested first "
+            f"build (only Optional version(s) {supported} are available) (PORT-007). Suggested first "
             f"remediation: propose updating this document's declared 'specmd_optional' version to "
-            f"'{core_profile.OPTIONAL_VERSION}' as a Specification Set change if accurate, or supply/register "
+            f"'{core_profile.OPTIONAL_VERSION}' (the latest supported) or another of {supported} as a "
+            "Specification Set change if accurate, or supply/register "
             f"the exact Optional {report.declared_optional_version} standards document before re-running "
             "evaluation. Do not silently substitute a different resolved version (PORT-006).",
             file_label,

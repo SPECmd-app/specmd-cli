@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # ICD ICD-COMP-001: CLI ICD / JSON schema / adapter formats are versioned
 # independently from the tool release. This module only carries the tool

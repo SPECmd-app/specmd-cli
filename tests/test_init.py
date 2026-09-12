@@ -16,7 +16,7 @@ def test_init_creates_minimal_core_doc(tmp_path, capsys):
     assert code == exit_codes.SUCCESS
     assert out.exists()
     text = out.read_text()
-    assert "0.4.2" in text
+    assert "0.4.3" in text  # init always creates at the latest supported version
     assert "specmd_optional" not in text
     assert "optional_features" not in text
 

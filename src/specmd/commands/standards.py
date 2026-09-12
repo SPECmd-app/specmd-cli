@@ -13,20 +13,30 @@ from specmd import core_profile, exit_codes
 from specmd.envelope import build_envelope
 from specmd.frontmatter import parse_document
 
-_BUNDLED = {
+_SUPPORTED = {
+    "core": core_profile.SUPPORTED_CORE_VERSIONS,
+    "optional": core_profile.SUPPORTED_OPTIONAL_VERSIONS,
+}
+_LATEST = {
     "core": core_profile.CORE_VERSION,
     "optional": core_profile.OPTIONAL_VERSION,
 }
 
 
 def list_() -> tuple[dict, int]:
-    results = {
-        "versions": [
-            {"kind": "core", "version": core_profile.CORE_VERSION, "source": "bundled_local", "channel": "stable"},
-            {"kind": "optional", "version": core_profile.OPTIONAL_VERSION, "source": "bundled_local", "channel": "stable"},
-        ],
-        "note": core_profile.PROFILE_PROVENANCE,
-    }
+    versions = []
+    for kind in ("core", "optional"):
+        for v in _SUPPORTED[kind]:
+            versions.append(
+                {
+                    "kind": kind,
+                    "version": v,
+                    "source": "bundled_local",
+                    "channel": "stable",
+                    "latest": v == _LATEST[kind],
+                }
+            )
+    results = {"versions": versions, "note": core_profile.PROFILE_PROVENANCE}
     envelope = build_envelope(
         command="standards_list",
         status="succeeded",
@@ -42,7 +52,7 @@ def list_() -> tuple[dict, int]:
 
 
 def show(kind: str, version: str) -> tuple[dict, int]:
-    if kind not in _BUNDLED:
+    if kind not in _SUPPORTED:
         envelope = build_envelope(
             command="standards_show",
             status="failed",
@@ -56,15 +66,16 @@ def show(kind: str, version: str) -> tuple[dict, int]:
         )
         return envelope, exit_codes.USAGE_ERROR
 
-    resolved_version = _BUNDLED[kind] if version == "latest" else version
+    resolved_version = _LATEST[kind] if version == "latest" else version
     # SRC-013: `latest` must resolve to and be reported as an exact version,
     # never left as the literal word "latest".
-    if resolved_version != _BUNDLED[kind]:
+    if resolved_version not in _SUPPORTED[kind]:
+        supported = ", ".join(_SUPPORTED[kind])
         envelope = build_envelope(
             command="standards_show",
             status="failed",
             inputs={"kind": kind, "version": version},
-            results={"reason": f"exact {kind} version '{version}' is not available; only {_BUNDLED[kind]} is bundled in this build"},
+            results={"reason": f"exact {kind} version '{version}' is not available; only {supported} are bundled in this build"},
             findings=[],
             writes=[],
             cognitive_requested="off",
@@ -89,6 +100,7 @@ def show(kind: str, version: str) -> tuple[dict, int]:
     results = {
         "kind": kind,
         "resolved_version": resolved_version,
+        "is_latest": resolved_version == _LATEST[kind],
         "source": "bundled_local",
         "provenance": core_profile.PROFILE_PROVENANCE,
         "profile": profile,
@@ -123,15 +135,15 @@ def verify(core_document: Path | None, optional_document: Path | None) -> tuple[
             all_ok = False
             continue
         declared = (doc.frontmatter or {}).get(field)
-        matches_bundled = declared == _BUNDLED[label]
+        matches_bundled = declared in _SUPPORTED[label]
         checks.append(
             {
                 "kind": label,
                 "path": str(path),
                 "ok": matches_bundled,
                 "declared_version": declared,
-                "bundled_version": _BUNDLED[label],
-                "reason": None if matches_bundled else f"declared '{declared}' does not match bundled '{_BUNDLED[label]}'",
+                "bundled_versions": list(_SUPPORTED[label]),
+                "reason": None if matches_bundled else f"declared '{declared}' is not among bundled versions {list(_SUPPORTED[label])}",
             }
         )
         all_ok = all_ok and matches_bundled

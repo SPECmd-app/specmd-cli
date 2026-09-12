@@ -1,4 +1,11 @@
-"""SPEC.md Core 0.4.2 / Optional 0.4.2 structural profile.
+"""SPEC.md Core 0.4.2/0.4.3 and Optional 0.4.2/0.4.3 structural profile.
+
+VERSION NOTE: 0.4.3 was added after being diffed directly against 0.4.2's
+authoritative text and confirmed to be a pure editorial PATCH release (no
+normative behavioral difference — Core §12's own PATCH test). Both versions
+resolve to the same structural profile below; SUPPORTED_CORE_VERSIONS and
+SUPPORTED_OPTIONAL_VERSIONS list every version this build actually verified
+this way, not just the latest.
 
 RECONCILIATION NOTE: this profile was originally *reconstructed* from a
 single exemplar (this tool's own SPEC.md), because the package that shipped
@@ -43,11 +50,29 @@ reader can verify the claim rather than take it on faith.
 
 from __future__ import annotations
 
-CORE_VERSION = "0.4.2"
-OPTIONAL_VERSION = "0.4.2"
+# CORE_VERSION/OPTIONAL_VERSION are the *latest* version this build creates
+# new documents with (init, trace create --enable-optional). For *resolving*
+# an existing document's declared version, see SUPPORTED_CORE_VERSIONS below
+# — 0.4.2 remains a first-class, fully resolvable version, not merely
+# tolerated: 0.4.3 is a confirmed PATCH release (verified by diffing the
+# authoritative texts directly — no normative behavioral difference,
+# consistent with Core §12's own PATCH test), so a document declaring 0.4.2
+# is exactly as conforming as one declaring 0.4.3, just older wording.
+CORE_VERSION = "0.4.3"
+OPTIONAL_VERSION = "0.4.3"
+SUPPORTED_CORE_VERSIONS = ("0.4.2", "0.4.3")
+SUPPORTED_OPTIONAL_VERSIONS = ("0.4.2", "0.4.3")
 
-CORE_SOURCE_URL = "https://github.com/SPECmd-app/SPEC.md/blob/main/docs/standard/0.4.2.md"
-OPTIONAL_SOURCE_URL = "https://github.com/SPECmd-app/SPEC.md/blob/main/docs/standard/0.4.2-optional.md"
+# 0.4.3's actual content change: it adds explicit text confirming this
+# build's FLW-*/Behavioral-Flow-ID trace-coverage exclusion decision (see
+# FLOW_ID_PREFIXES below) — "An ID alone does not make an element
+# normative... TRACE coverage follows normative obligations, not every
+# label in the document" (Core 0.4.3, after §7; near-identical text in
+# Optional 0.4.3). That decision was reached independently, from the same
+# System Model/Requirements structural evidence available in 0.4.2, and
+# 0.4.3 confirms it explicitly rather than changing it.
+CORE_SOURCE_URL = "https://github.com/SPECmd-app/SPEC.md/blob/main/docs/standard/0.4.3.md"
+OPTIONAL_SOURCE_URL = "https://github.com/SPECmd-app/SPEC.md/blob/main/docs/standard/0.4.3-optional.md"
 
 # The trace-format version (`specmd_trace` frontmatter field) and the
 # TRACE.md binding contract (traces_file/traces_spec exact-version pairing,
@@ -62,15 +87,16 @@ OPTIONAL_SOURCE_URL = "https://github.com/SPECmd-app/SPEC.md/blob/main/docs/stan
 TRACE_FORMAT_VERSION = "0.4.0"
 
 PROFILE_PROVENANCE = (
-    f"reconciled against the authoritative SPEC.md Core {CORE_VERSION} standard "
-    f"({CORE_SOURCE_URL}) and Optional {OPTIONAL_VERSION} standard ({OPTIONAL_SOURCE_URL}); "
-    "one figure (the Core compactness target) remains unconfirmed by that text — see "
-    "CORE_COMPACTNESS_PROVENANCE"
+    f"reconciled against the authoritative SPEC.md Core standard ({CORE_SOURCE_URL}) and "
+    f"Optional standard ({OPTIONAL_SOURCE_URL}); supports Core/Optional versions "
+    f"{', '.join(SUPPORTED_CORE_VERSIONS)} (0.4.3 verified by direct diff against 0.4.2 as a "
+    "pure editorial PATCH — no behavioral difference); one figure (the Core compactness "
+    "target) remains unconfirmed by that text — see CORE_COMPACTNESS_PROVENANCE"
 )
 
 CORE_COMPACTNESS_PROVENANCE = (
     "the 250-line/2,500-token figures appear nowhere in the authoritative Core or Optional "
-    "0.4.2 text, or on the standard's own site; they came from this tool's own governing spec "
+    "text, or on the standard's own site; they came from this tool's own governing spec "
     "prose and remain unconfirmed against the authoritative standard"
 )
 

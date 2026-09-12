@@ -141,7 +141,12 @@ def create(
 
         # TRACEGEN-008: add a compatible specmd_optional declaration, enable
         # the trace feature, and bump spec_version, then write SPEC.md.
-        fm.setdefault("specmd_optional", core_profile.OPTIONAL_VERSION)
+        # "Compatible" means matching the document's own already-declared
+        # Core version (the Optional companion MUST match its declared Core
+        # version) — by this point _version_alignment_refusal has already
+        # confirmed that declared version is one this build supports, so it
+        # is always a safe choice, not just a same-numbered convenience.
+        fm.setdefault("specmd_optional", fm.get("specmd", core_profile.OPTIONAL_VERSION))
         features = dict(fm.get("optional_features") or {})
         features["trace"] = True
         fm["optional_features"] = features

@@ -1,7 +1,7 @@
 ---
 specmd_trace: "0.4.0"
 traces_file: "SPEC.md"
-traces_spec: "0.12.0"
+traces_spec: "0.12.1"
 status: draft
 name: "specmd Tool Traceability"
 last_updated: "2026-09-12"
@@ -11,7 +11,7 @@ last_updated: "2026-09-12"
 
 ## Purpose
 
-This informative companion maps the Specification Set rooted at `SPEC.md` version `0.12.0` to logical design areas and planned verification evidence.
+This informative companion maps the Specification Set rooted at `SPEC.md` version `0.12.1` to logical design areas and planned verification evidence.
 
 The normative specification remains authoritative. This document does not add, remove, or reinterpret required behavior.
 
@@ -57,7 +57,7 @@ Verification methods use:
 | VAL-009 | Result presentation | I, T | Structural-pass disclaimer fixture | TBD |
 | VAL-010, VAL-011 | Module index parser and safe path resolver | T, A | Valid, cyclic, missing, duplicate, and escaping-path fixtures | src/specmd/module_resolver.py (tests/test_validate.py) |
 | VAL-012, VAL-013 | Automatic profile detector | T | Core-only auto-detection and no-warning fixture | src/specmd/structural.py (tests/test_validate.py) |
-| VAL-014, VAL-017 | Optional resolver and feature-rule registry | T, I | Supported and unknown Optional feature fixtures | src/specmd/structural.py, src/specmd/core_profile.py (tests/test_validate.py) — VAL-017's "unrecognized feature" is reported as informational, not a defect, per Optional 0.4.2 §44's confirmed open feature set |
+| VAL-014, VAL-017 | Optional resolver and feature-rule registry | T, I | Supported and unknown Optional feature fixtures | src/specmd/structural.py, src/specmd/core_profile.py (tests/test_validate.py) — VAL-017's "unrecognized feature" is reported as informational, not a defect, per Optional §44's confirmed open feature set (checked against both 0.4.2 and 0.4.3, unchanged between them) |
 | VAL-015, VAL-016 | Explicit profile evaluator | T | Forced-Core and missing-Optional fixtures | TBD |
 | TRACE-001, TRACE-002 | Trace command-input parser | T | Explicit and default trace-mode fixtures | src/specmd/trace_pair.py (tests/test_validate.py) |
 | TRACE-003, TRACE-004, TRACE-005 | Trace discovery and pair-state resolver | T | Declared, undeclared, present, and missing trace fixtures | TBD |
@@ -134,7 +134,7 @@ Verification methods use:
 | REL-002 | Safe output writer | T, A | Failure-injection and atomicity fixture | TBD |
 | REL-003 | Finding sorter | T | Deterministic-order snapshot | TBD |
 | REL-004 | Generation result reporter | T | Partial-output failure fixture | TBD |
-| PORT-001, PORT-002, PORT-003 | Core compatibility layer | T, I | Multi-version compatibility suite | TBD |
+| PORT-001, PORT-002, PORT-003 | Core compatibility layer | T, I | Multi-version compatibility suite | src/specmd/core_profile.py (SUPPORTED_CORE_VERSIONS/SUPPORTED_OPTIONAL_VERSIONS), src/specmd/structural.py (tests/test_validate.py, tests/test_standards.py) — Core/Optional 0.4.2 and 0.4.3 both fully supported; 0.4.3 verified by direct diff against 0.4.2 as a pure editorial PATCH before being added, never silently substituted for an older declared version |
 | PORT-004 | Independent artifact versioning | I, T | Schema, adapter, and rule-version checks | TBD |
 | PORT-005 | Platform abstraction | T | Normalized cross-platform result comparison | TBD |
 | PORT-006, PORT-007, PORT-008 | Version Alignment Process — exact-version resolver and indeterminate/remediation reporter | T, I | Non-substitution, indeterminate-on-unresolved, and first-suggested-remediation fixtures | src/specmd/structural.py (version_unresolved, version_alignment_finding), applied in commands/validate.py, commands/inspect.py, commands/trace.py (tests/test_validate.py, tests/test_inspect.py, tests/test_trace.py) |
@@ -266,7 +266,7 @@ Verification methods use:
 4. Adapter installation-path evidence depends on resolution of Open Issue 3.
 5. Direct-Provider implementation evidence depends on resolution of Open Issue 4.
 6. Stable rule-catalog evidence depends on resolution of Open Issue 5.
-7. **Resolved.** `FLW-001` and `FLW-002` (Behavioral Flow headings, section 3.3) are explicitly out of `TRACE-007`'s scope, not merely untraced. When first found, this was an open classification question (see the project history for the original framing); it's since been settled by evidence from the authoritative standard text itself, now located: Core 0.4.2 §5 "System Model" lists "behavioral flows" as a structural element distinct from §6 "Requirements" (where stable IDs are recommended — its own example prefixes, `FUN`/`DATA`/`AUTH`/`SEC`/`INT`, are never flow-shaped), and Optional 0.4.2 Appendix C's example trace chain (`AUTH-004 → FLW-AUTH-002 → DES-AUTH-003 → TASK-014 → ...`) treats "Flow" as its own layer between Requirement and Design/Task/Implementation/Verification — not folded into requirement-ID trace coverage. `src/specmd/ids.py`'s `extract_requirement_ids` now excludes any `FLW-`-prefixed identifier explicitly (`core_profile.FLOW_ID_PREFIXES`), and `extract_flow_ids` surfaces them separately so nothing is silently dropped. The pair validates `aligned` as of this entry.
+7. **Resolved.** `FLW-001` and `FLW-002` (Behavioral Flow headings, section 3.3) are explicitly out of `TRACE-007`'s scope, not merely untraced. When first found, this was an open classification question, settled by evidence from Core 0.4.2 §5 "System Model" (lists "behavioral flows" as distinct from §6 "Requirements," whose own example prefixes — `FUN`/`DATA`/`AUTH`/`SEC`/`INT` — are never flow-shaped) and Optional 0.4.2 Appendix C's example trace chain (treats "Flow" as its own layer, not folded into requirement-ID trace coverage). Subsequently, Core/Optional 0.4.3 confirmed this reading explicitly and in writing — new text added specifically for this: *"An ID alone does not make an element normative... TRACE coverage follows normative obligations, not every label in the document"* (Core 0.4.3), and *"Behavioral flows and other identified specification elements MAY be traced when useful, but their IDs do not automatically require TRACE coverage"* (Optional 0.4.3). `src/specmd/ids.py`'s `extract_requirement_ids` excludes any `FLW-`-prefixed identifier explicitly (`core_profile.FLOW_ID_PREFIXES`), and `extract_flow_ids` surfaces them separately so nothing is silently dropped. The pair validates `aligned`.
 
 ## Maintenance Rules
 

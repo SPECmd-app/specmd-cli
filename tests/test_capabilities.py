@@ -9,7 +9,8 @@ def test_capabilities_reports_commands_and_versions(capsys):
     assert code == 0
     assert envelope["status"] == "succeeded"
     r = envelope["results"]
-    assert r["core_versions_supported"] == ["0.4.2"]
+    assert r["core_versions_supported"] == ["0.4.2", "0.4.3"]
+    assert r["latest_core_version"] == "0.4.3"
     names = {c["name"] for c in r["commands"]}
     assert {"init", "validate", "blackbox", "test", "adapt", "capabilities", "help"} <= names
     unavailable = {c["name"]: c for c in r["commands"] if not c["available"]}

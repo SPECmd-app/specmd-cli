@@ -55,6 +55,18 @@ def test_unclosed_human_only_is_error(tmp_fixture, capsys):
     assert envelope["results"]["specification_result"] == "non_conforming"
 
 
+def test_core_0_4_3_document_validates_conforming(tmp_fixture, capsys):
+    # 0.4.3 was verified to be a pure editorial PATCH of 0.4.2 (diffed
+    # directly against the authoritative texts) and is now a fully
+    # first-class supported version, not merely tolerated.
+    d = tmp_fixture("core_0_4_3")
+    envelope, code = _run_json(capsys, ["validate", str(d / "SPEC.md"), "--trace", "none"])
+    assert envelope["results"]["specification_result"] == "conforming"
+    assert code == exit_codes.SUCCESS
+    assert "0.4.3" in envelope["results"]["core_profile"]["versions_supported"]
+    assert "0.4.2" in envelope["results"]["core_profile"]["versions_supported"]
+
+
 def test_wrong_core_version_is_indeterminate(tmp_fixture, capsys):
     d = tmp_fixture("broken")
     envelope, code = _run_json(capsys, ["validate", str(d / "wrong_core_version.md"), "--trace", "none"])
