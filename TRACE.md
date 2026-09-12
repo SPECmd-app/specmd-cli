@@ -57,7 +57,7 @@ Verification methods use:
 | VAL-009 | Result presentation | I, T | Structural-pass disclaimer fixture | TBD |
 | VAL-010, VAL-011 | Module index parser and safe path resolver | T, A | Valid, cyclic, missing, duplicate, and escaping-path fixtures | src/specmd/module_resolver.py (tests/test_validate.py) |
 | VAL-012, VAL-013 | Automatic profile detector | T | Core-only auto-detection and no-warning fixture | src/specmd/structural.py (tests/test_validate.py) |
-| VAL-014, VAL-017 | Optional resolver and feature-rule registry | T, I | Supported and unknown Optional feature fixtures | TBD |
+| VAL-014, VAL-017 | Optional resolver and feature-rule registry | T, I | Supported and unknown Optional feature fixtures | src/specmd/structural.py, src/specmd/core_profile.py (tests/test_validate.py) — VAL-017's "unrecognized feature" is reported as informational, not a defect, per Optional 0.4.2 §44's confirmed open feature set |
 | VAL-015, VAL-016 | Explicit profile evaluator | T | Forced-Core and missing-Optional fixtures | TBD |
 | TRACE-001, TRACE-002 | Trace command-input parser | T | Explicit and default trace-mode fixtures | src/specmd/trace_pair.py (tests/test_validate.py) |
 | TRACE-003, TRACE-004, TRACE-005 | Trace discovery and pair-state resolver | T | Declared, undeclared, present, and missing trace fixtures | TBD |
