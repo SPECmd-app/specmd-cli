@@ -1,5 +1,6 @@
-"""Deterministic structural checks against the reconstructed Core/Optional
-profile (core_profile.py). Shared by `validate` and `inspect`.
+"""Deterministic structural checks against the Core/Optional profile
+(core_profile.py), reconciled against the authoritative standard text.
+Shared by `validate` and `inspect`.
 """
 
 from __future__ import annotations
@@ -9,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from specmd import core_profile, human_only
-from specmd.findings import EVIDENCE_DETERMINISTIC, SEVERITY_ERROR, SEVERITY_WARNING, Finding
+from specmd.findings import EVIDENCE_DETERMINISTIC, SEVERITY_ERROR, SEVERITY_INFORMATION, SEVERITY_WARNING, Finding
 from specmd.frontmatter import ParsedDocument, parse_document, strip_leading_numeral
 
 RESULT_CONFORMING = "conforming"
@@ -119,12 +120,18 @@ def analyze(path: Path, requested_profile: str) -> StructuralReport:
                 )
             for feature in declared_features:
                 if feature not in core_profile.RECOGNIZED_OPTIONAL_FEATURES:
+                    # Optional 0.4.2 §44 frames optional_features as an open,
+                    # extensible set ("Suggested... Example"), not a closed
+                    # enum — an unlisted name is not itself a defect, only a
+                    # feature this build has no dedicated structural checks
+                    # for (VAL-017 still requires surfacing it, informationally).
                     findings.append(
                         _finding(
                             "CORE-VAL-017",
-                            SEVERITY_WARNING,
-                            f"optional_features declares unrecognized feature '{feature}' "
-                            f"(not evaluated as successfully conforming)",
+                            SEVERITY_INFORMATION,
+                            f"optional_features declares '{feature}', which this build has no dedicated "
+                            f"structural checks for (the Optional feature set is open-ended per SPEC.md "
+                            f"Optional 0.4.2 §44 — this is not a defect)",
                             file_label,
                             1,
                         )
@@ -157,7 +164,11 @@ def analyze(path: Path, requested_profile: str) -> StructuralReport:
             idx += 1
     missing = expected[idx:]
     for section in missing:
-        findings.append(_finding("CORE-SECTIONS", SEVERITY_ERROR, f"required section '{section}' was not found (or is out of order)", file_label))
+        # Core §1 makes "Specification Contract" a SHOULD, and §2's "Empty
+        # subsections MAY be omitted" was read, by product decision, as
+        # permitting a genuinely-empty top-level section to be omitted too —
+        # so a missing section is a warning, not a conformance error.
+        findings.append(_finding("CORE-SECTIONS", SEVERITY_WARNING, f"required section '{section}' was not found (or is out of order)", file_label))
 
     # Human-only comment balance (SAFE-006).
     for issue in human_only.find_issues(text):

@@ -1,8 +1,16 @@
 """Normative Specification Modules link resolution (VAL-010/011, SPEC.md
-section 5.6): parses relative Markdown links out of a "Normative
+section 5.6): parses relative module declarations out of a "Normative
 Specification Modules" section, resolves them relative to the referencing
 document, and detects cycles, duplicates, and paths escaping the
 Specification Set root.
+
+Recognizes two declaration syntaxes, both confirmed against the
+authoritative SPEC.md Optional 0.4.2 standard (§10 "Advanced Specification
+Set Organization"): a real Markdown link (`- [text](path)`, the convention
+this tool's own SPEC.md uses) and the standard's own illustrated bare
+backtick-quoted path (`` - `spec/identity.md` `` — no link syntax at all).
+A resolver that only understood the first form would silently miss modules
+declared the standard's own documented way.
 """
 
 from __future__ import annotations
@@ -19,6 +27,10 @@ from specmd.code_fences import strip_code_fences
 _SECTION_HEADING_RE = re.compile(r"^#{1,6}\s+(?:\d+(?:\.\d+)*\.?\s+)?Normative Specification Modules\s*$", re.MULTILINE)
 _NEXT_HEADING_RE = re.compile(r"^#{1,6}\s+\S", re.MULTILINE)
 _LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+# Optional §10's own convention: a bullet list item that is nothing but a
+# backtick-quoted path. Required to look path-like (ends in a file
+# extension) to avoid matching unrelated inline-code bullets.
+_BACKTICK_PATH_RE = re.compile(r"^\s*-\s+`([^`\s]+\.[A-Za-z0-9]+)`\s*$", re.MULTILINE)
 
 
 @dataclass
@@ -40,7 +52,14 @@ def extract_declared_links(body_text: str) -> list[str]:
     rest = body_text[heading_match.end():]
     next_heading = _NEXT_HEADING_RE.search(rest)
     section_text = rest[: next_heading.start()] if next_heading else rest
-    return [m.group(1) for m in _LINK_RE.finditer(section_text)]
+    links: list[str] = []
+    for m in _LINK_RE.finditer(section_text):
+        links.append(m.group(1))
+    for m in _BACKTICK_PATH_RE.finditer(section_text):
+        candidate = m.group(1)
+        if candidate not in links:
+            links.append(candidate)
+    return links
 
 
 def resolve_modules(root_path: Path, set_root: Path, allow_external: bool = False) -> ModuleResolution:

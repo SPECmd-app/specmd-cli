@@ -18,7 +18,7 @@ from specmd.envelope import build_envelope
 from specmd.frontmatter import strip_leading_numeral
 from specmd.ids import extract_acceptance_entries, extract_requirement_ids
 
-# Sections that, per the reconstructed Core profile, typically carry
+# Sections that, per the Core profile, typically carry
 # black-box-relevant content: actors/interfaces/errors/state.
 _INTERFACE_SECTION_NAMES = ("Interfaces and External Contracts", "System Model")
 
@@ -119,7 +119,10 @@ def run(
         "completeness": {
             "specification_completeness": {
                 "missing_interface_sections": missing_interface_sections,
-                "structural_errors": [f.to_dict() for f in report.findings if f.severity == "error"],
+                # Both severities: since Core §2's missing-section check is a
+                # warning (not an error) by design, filtering to errors only
+                # would silently drop that signal from completeness reporting.
+                "structural_findings": [f.to_dict() for f in report.findings if f.severity in ("error", "warning")],
             },
             "trace_coverage": {
                 "available": trace_available,

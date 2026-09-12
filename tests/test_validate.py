@@ -36,11 +36,16 @@ def test_missing_frontmatter_is_indeterminate(tmp_fixture, capsys):
     assert any(f["rule_id"] == "CORE-FRONTMATTER" for f in envelope["findings"])
 
 
-def test_missing_section_is_non_conforming(tmp_fixture, capsys):
+def test_missing_section_is_warning_not_error(tmp_fixture, capsys):
+    # Core §2's "Empty subsections MAY be omitted" was read, by product
+    # decision, as permitting a genuinely-missing top-level section too —
+    # so this is a warning (still `conforming`), not a conformance error.
     d = tmp_fixture("broken")
     envelope, code = _run_json(capsys, ["validate", str(d / "missing_section.md"), "--trace", "none"])
-    assert envelope["results"]["specification_result"] == "non_conforming"
-    assert any(f["rule_id"] == "CORE-SECTIONS" for f in envelope["findings"])
+    assert envelope["results"]["specification_result"] == "conforming"
+    section_findings = [f for f in envelope["findings"] if f["rule_id"] == "CORE-SECTIONS"]
+    assert section_findings
+    assert all(f["severity"] == "warning" for f in section_findings)
 
 
 def test_unclosed_human_only_is_error(tmp_fixture, capsys):
@@ -76,6 +81,29 @@ def test_lowercase_keyword_is_warning_not_error(tmp_fixture, capsys):
     assert len(bcp14) == 1
     assert bcp14[0]["severity"] == "warning"
     # A single warning must not by itself make the document non-conforming.
+    assert envelope["results"]["specification_result"] == "conforming"
+
+
+def test_module_resolution_backtick_path_convention(tmp_fixture, capsys):
+    # SPEC.md Optional 0.4.2 §10's own illustrated convention: a bare
+    # backtick-quoted path, not a Markdown link.
+    d = tmp_fixture("backtick_module_link")
+    envelope, code = _run_json(capsys, ["validate", str(d / "SPEC.md"), "--trace", "none"])
+    assert str(d / "module_a.md") in envelope["results"]["evaluated_files"]
+    assert not any(f["rule_id"] == "VAL-005" for f in envelope["findings"])
+
+
+def test_unrecognized_optional_feature_is_informational_not_warning(tmp_fixture, capsys):
+    # Optional 0.4.2 §44 frames optional_features as an open set; an
+    # unlisted name is not a defect.
+    d = tmp_fixture("optional_trace")
+    spec_path = d / "SPEC.md"
+    text = spec_path.read_text().replace("  trace: true", "  trace: true\n  some_future_feature: true")
+    spec_path.write_text(text)
+    envelope, code = _run_json(capsys, ["validate", str(spec_path), "--trace", "none"])
+    feature_findings = [f for f in envelope["findings"] if f["rule_id"] == "CORE-VAL-017"]
+    assert len(feature_findings) == 1
+    assert feature_findings[0]["severity"] == "information"
     assert envelope["results"]["specification_result"] == "conforming"
 
 

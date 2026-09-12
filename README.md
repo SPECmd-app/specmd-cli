@@ -71,28 +71,49 @@ silently assumed): `standards fetch` and any network access, the Cucumber
 connector family, Direct-Provider/Host-Agent cognitive modes, and Reviewer
 Agents.
 
-## Important caveat: reconstructed Core/Optional profile
+## Core/Optional profile: reconciled against the authoritative standard
 
 The Specification Set this tool implements declares conformance to **SPEC.md
-Core 0.4.2** and **Optional 0.4.2**, but the package it was built from did
-not include the actual Core/Optional standard documents — only specmd's own
-tool specification, which *uses* Core/Optional.
+Core 0.4.2** and **Optional 0.4.2**. The structural rules this build
+validates against were originally *reconstructed* from a single exemplar
+(this tool's own `SPEC.md`), because the package this project was built from
+did not include the authoritative standard text.
 
-The structural rules this build validates against (required frontmatter
-fields, the eight required section headings, human-only comment delimiter
-syntax, BCP14 keyword usage, the recognized `optional_features` set) were
-**reconstructed from the one exemplar available** — `SPEC.md`'s own shape —
-not from the authoritative standard text. This is isolated in
-[`src/specmd/core_profile.py`](src/specmd/core_profile.py) and labeled
-`PROFILE_PROVENANCE`, which every `validate`/`inspect`/`trace create` result
-surfaces explicitly. Treat conformance results accordingly until the real
-Core/Optional documents are available to replace this reconstruction.
-
-**Update:** the authoritative standard has since been located, published at
+That gap has since been closed. The authoritative standard is published at
 [`SPECmd-app/SPEC.md`](https://github.com/SPECmd-app/SPEC.md)'s
-`docs/standard/0.4.2.md` and `0.4.2-optional.md` (and versions back to
-`0.2.0`). Reconciling `core_profile.py` against the real text is a planned
-follow-up, not yet done as of this commit.
+[`docs/standard/0.4.2.md`](https://github.com/SPECmd-app/SPEC.md/blob/main/docs/standard/0.4.2.md)
+and
+[`0.4.2-optional.md`](https://github.com/SPECmd-app/SPEC.md/blob/main/docs/standard/0.4.2-optional.md),
+and [`src/specmd/core_profile.py`](src/specmd/core_profile.py) has been
+reconciled against that text directly. Four real discrepancies were found
+and fixed:
+
+- **"Specification Contract" is a SHOULD, not a MUST** (Core §1) — its
+  absence is now a warning, not a conformance error.
+- **A missing required top-level section is now a warning, not an error**
+  — Core §2 lists the eight sections as what "a conforming SPEC.md uses,"
+  immediately followed by "Empty subsections MAY be omitted." Read as
+  permitting a genuinely-empty section to be omitted too (a deliberate
+  product decision, since the standard's wording doesn't fully settle it),
+  a document missing one can still be `conforming`.
+- **Module declarations can use a bare backtick-quoted path, not only a
+  Markdown link** — Optional §10's own example uses `` - `spec/identity.md` ``
+  with no link syntax at all. `module_resolver.py` now recognizes both forms.
+- **`optional_features` is an open, extensible set, not a closed enum** —
+  Optional §44 explicitly frames its feature list as a "Suggested...
+  Example." An unlisted feature name is now reported as informational, not
+  a warning.
+
+One figure remains unconfirmed: the `250 lines` / `2,500 tokens` Core
+compactness target appears nowhere in the authoritative Core or Optional
+text, or on the standard's own site — it came from this tool's own governing
+spec prose. It's kept (still plausibly accurate) but explicitly flagged as
+unconfirmed (`CORE_COMPACTNESS_PROVENANCE` in `core_profile.py`), separately
+from the rest of the now-reconciled profile.
+
+Every `validate`/`inspect`/`trace create` result still cites
+`core_profile.PROFILE_PROVENANCE` explicitly, so this claim is checkable
+rather than taken on faith.
 
 ## License
 
