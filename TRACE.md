@@ -81,7 +81,7 @@ Verification methods use:
 | AGENT-010, AGENT-011 | Agent/Cucumber responsibility and execution boundary | T, I | Step-definition ownership and no-implicit-run fixtures | TBD |
 | AGENT-012 | Agent standards-version preservation | T, I | Historical repository and explicit-local-source fixtures | TBD |
 | ADPI-001, ADPI-002, ADPI-003, ADPI-004 | Adapter generation, installation, and preservation | T, I | Generate/install separation and update-conflict fixtures | TBD |
-| MCP-001, MCP-002, MCP-003, MCP-004, MCP-005 | Structured tool interface | T, I | Capability parity, authorization, and discovery contract suite | TBD |
+| MCP-001, MCP-002, MCP-003, MCP-004, MCP-005 | Structured tool interface | T, I | Capability parity, authorization, and discovery contract suite | src/specmd/mcp_server.py (tests/test_mcp_server.py) — hand-rolled stdio JSON-RPC 2.0 protocol (no official SDK: requires Python >=3.10, this build targets 3.9); MCP-002's 9 operations wrap the same command modules the CLI uses (MCP-003); validate_pair is a genuinely distinct pair-only operation, not a validate() alias; propose_patch is an honest stub (no patch-generation capability exists) |
 | PROV-001, PROV-002, PROV-003, PROV-004 | Provider configuration, credentials, and transmission boundary | T, A | Secure-config, disclosure, redaction, and comment-exclusion fixtures | TBD |
 | PROV-005, PROV-006, PROV-007, PROV-008, PROV-009 | Provider request, response, provenance, and failure behavior | T, I | Structured-response, untrusted-input, provenance, disable, and failure fixtures | TBD |
 | CTX-001, CTX-002, CTX-003, CTX-004, CTX-005, CTX-006 | Agent and provider context preparation | T, I | Root/module inclusion, filtering, precedence, truncation, and labeling fixtures | TBD |

@@ -40,6 +40,18 @@ Implemented:
 - `specmd help [topic]` — real per-command help (syntax-light: see gap below),
   `--search`, `--all` to include unavailable capabilities. Reads the same
   static registry (`command_metadata.py`) `capabilities` does.
+- `specmd-mcp` — an MCP (Model Context Protocol) stdio server exposing
+  `create`/`validate`/`inspect`/`blackbox`/`trace_create`/`trace_update`/
+  `validate_pair`/`propose_patch`/`capabilities` as MCP tools (MCP-001..005).
+  **Hand-rolled protocol, not the official SDK**: the `mcp` PyPI package
+  requires Python ≥3.10, and this build targets 3.9, so
+  [`src/specmd/mcp_server.py`](src/specmd/mcp_server.py) implements the stdio
+  JSON-RPC 2.0 wire protocol directly (pure stdlib, no new dependency). Every
+  tool wraps the same command module the CLI uses and returns the identical
+  JSON envelope. `propose_patch` is an honest stub — no patch-generation
+  capability exists in this build, so it always returns an error rather than
+  fabricate a diff. Run it as `specmd-mcp` (installed entry point) or
+  `python -m specmd.mcp_server`.
 - Deterministic-Only Mode (`--cognitive off|auto|required` is negotiated
   truthfully; no Cognitive Provider or Reviewer Agent is implemented).
 
@@ -56,8 +68,8 @@ Implemented:
 
 Not implemented at all (left `TBD`/unclaimed in [TRACE.md](TRACE.md), not
 silently assumed): `standards fetch` and any network access, the Cucumber
-connector family, an MCP/structured-tool interface, Direct-Provider/Host-Agent
-cognitive modes, and Reviewer Agents.
+connector family, Direct-Provider/Host-Agent cognitive modes, and Reviewer
+Agents.
 
 ## Important caveat: reconstructed Core/Optional profile
 
@@ -87,4 +99,9 @@ python3 -m venv .venv
 
 ```bash
 .venv/bin/specmd --output-format json validate SPEC.md --trace auto
+```
+
+```bash
+# MCP server: reads/writes newline-delimited JSON-RPC 2.0 on stdio.
+.venv/bin/specmd-mcp
 ```

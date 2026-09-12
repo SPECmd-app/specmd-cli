@@ -13,6 +13,7 @@ dependencies = [
 
 [project.scripts]
 specmd = "specmd.cli:main"
+specmd-mcp = "specmd.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

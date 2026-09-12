@@ -117,8 +117,8 @@ COMMANDS: list[CommandInfo] = [
     CommandInfo(
         name="blackbox",
         summary="Read-only, outside-in Black-Box Contract analysis.",
-        read_only=True,
-        writes=False,
+        read_only=False,  # --export writes a report file
+        writes=True,
         network=False,
         executes_code=False,
         available=True,
@@ -127,8 +127,8 @@ COMMANDS: list[CommandInfo] = [
     CommandInfo(
         name="test",
         summary="Verification-coverage report; does not execute code by default.",
-        read_only=True,
-        writes=False,
+        read_only=False,  # --export writes a test-plan file
+        writes=True,
         network=False,
         executes_code=False,
         available=True,
