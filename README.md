@@ -88,6 +88,16 @@ not from the authoritative standard text. This is isolated in
 surfaces explicitly. Treat conformance results accordingly until the real
 Core/Optional documents are available to replace this reconstruction.
 
+**Update:** the authoritative standard has since been located, published at
+[`SPECmd-app/SPEC.md`](https://github.com/SPECmd-app/SPEC.md)'s
+`docs/standard/0.4.2.md` and `0.4.2-optional.md` (and versions back to
+`0.2.0`). Reconciling `core_profile.py` against the real text is a planned
+follow-up, not yet done as of this commit.
+
+## License
+
+[Apache-2.0](LICENSE)
+
 ## Development
 
 ```bash

@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "specmd"
 version = "0.1.0"
 description = "specmd: author, validate, inspect, render, and trace SPEC.md documents (MVP subset)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
 requires-python = ">=3.9"
 dependencies = [
     "pyyaml>=6.0",
