@@ -1,0 +1,63 @@
+name: SPEC.md / TRACE.md drift check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install specmd
+        run: pip install -e .
+
+      - name: Validate SPEC.md / TRACE.md pair
+        run: |
+          specmd --output-format json validate SPEC.md --trace auto > validate-result.json || true
+          cat validate-result.json
+
+      - name: Fail the build on drift
+        run: |
+          python3 - <<'PY'
+          import json
+          import sys
+
+          with open("validate-result.json") as f:
+              d = json.load(f)
+
+          status = d["status"]
+          results = d["results"]
+          spec_result = results["specification_result"]
+          trace = results["trace"]
+          pair_result = trace["pair_result"]
+
+          print(f"specification_result={spec_result} pair_result={pair_result} status={status}")
+
+          if trace["missing_requirement_ids"]:
+              print(f"::error::Requirement IDs missing from TRACE.md: {trace['missing_requirement_ids']}")
+          if trace["unknown_ids"]:
+              print(f"::error::TRACE.md references unknown identifiers: {trace['unknown_ids']}")
+
+          if status != "succeeded":
+              print(
+                  "::error::SPEC.md/TRACE.md are out of sync. Run "
+                  "`specmd validate SPEC.md --trace auto` locally, fix the drift "
+                  "(e.g. `specmd trace update`), and commit the result."
+              )
+              sys.exit(1)
+          PY
+
+      - name: Upload validation result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-validate-result
+          path: validate-result.json

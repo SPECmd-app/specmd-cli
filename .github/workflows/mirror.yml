@@ -1,0 +1,58 @@
+name: Mirror to sibling repository
+
+# This file is intentionally byte-identical in both xonix999/specmd and
+# SPECmd-app/specmd-cli — it determines its push direction at runtime from
+# github.repository rather than baking in a target, specifically because a
+# full-history mirror push would otherwise overwrite this very file in the
+# destination with the source's copy, breaking the direction for the next
+# sync. Do not hardcode TARGET_REPO into a per-repo copy of this file.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    # Skip re-triggering forever: only run when this push wasn't itself
+    # produced by the mirror job (see the "already in sync" short-circuit
+    # below, which is the real loop-breaker; this is just a cheap early exit).
+    if: "!contains(github.event.head_commit.message, '[skip-mirror]')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Determine mirror target
+        id: target
+        run: |
+          if [ "${{ github.repository }}" = "xonix999/specmd" ]; then
+            echo "repo=SPECmd-app/specmd-cli" >> "$GITHUB_OUTPUT"
+          else
+            echo "repo=xonix999/specmd" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push to sibling if out of date
+        env:
+          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+          TARGET_REPO: ${{ steps.target.outputs.repo }}
+        run: |
+          set -e
+          if [ -z "${MIRROR_TOKEN}" ]; then
+            echo "::error::MIRROR_TOKEN secret is not set; cannot mirror to ${TARGET_REPO}."
+            exit 1
+          fi
+          git remote add mirror "https://x-access-token:${MIRROR_TOKEN}@github.com/${TARGET_REPO}.git"
+          git fetch mirror main
+          LOCAL_SHA="$(git rev-parse HEAD)"
+          REMOTE_SHA="$(git rev-parse mirror/main)"
+          if [ "$LOCAL_SHA" = "$REMOTE_SHA" ]; then
+            echo "Already in sync at ${LOCAL_SHA}; nothing to push."
+            exit 0
+          fi
+          echo "Pushing ${LOCAL_SHA} to ${TARGET_REPO} (was ${REMOTE_SHA})."
+          # No --force: a genuine divergence (someone pushed directly to the
+          # sibling repo outside this mirror) should fail loudly, not
+          # silently overwrite that history.
+          git push mirror HEAD:main
