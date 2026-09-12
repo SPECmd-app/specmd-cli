@@ -1,7 +1,7 @@
 ---
 specmd_trace: "0.4.0"
 traces_file: "SPEC.md"
-traces_spec: "0.11.0"
+traces_spec: "0.12.0"
 status: draft
 name: "specmd Tool Traceability"
 last_updated: "2026-09-12"
@@ -11,7 +11,7 @@ last_updated: "2026-09-12"
 
 ## Purpose
 
-This informative companion maps the Specification Set rooted at `SPEC.md` version `0.11.0` to logical design areas and planned verification evidence.
+This informative companion maps the Specification Set rooted at `SPEC.md` version `0.12.0` to logical design areas and planned verification evidence.
 
 The normative specification remains authoritative. This document does not add, remove, or reinterpret required behavior.
 
@@ -115,6 +115,7 @@ Verification methods use:
 | REND-004, REND-005 | HTML and PDF renderers | T, D | Format generation and visual inspection | src/specmd/commands/render.py (tests/test_render.py; PDF explicitly unavailable, exit 4) |
 | REND-006, REND-007 | Specification Set assembler and provenance header | T, I | Modular render with version identification | TBD |
 | REND-008 | Self-contained asset policy | T, I | Offline rendered-output inspection | TBD |
+| REND-009 | Human-only editorial-rendering labeler | T | Labeled/styled-wrapper and raw-delimiter-absence fixtures | src/specmd/commands/render.py (tests/test_render.py) — added retroactively: the implementation (red-bordered, labeled `<div>`) predates this requirement ID, which formalizes ICD-CLI 8.4's existing "clearly labeled" text |
 | TEST-001, TEST-002, TEST-003 | Verification coverage analyzer | T | Covered, uncovered, and orphan acceptance fixtures | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
 | TEST-004 | Tool-neutral test-plan exporter | T, I | Export schema and content fixture | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
 | TEST-005, TEST-006, TEST-007 | Implementation-test boundary | T, A | Non-execution, explicit-integration, and claim-label fixtures | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
@@ -192,6 +193,7 @@ Verification methods use:
 | ACC-034 | CLI-002, CLI-003, CLI-012, CLI-013, TRACE-006, TRACEGEN-003 | Custom Root Specification filename, exact trace binding, and no-guess discovery test | Planned |
 | ACC-035 | BBX-001, BBX-002, BBX-003, BBX-004, BBX-005, BBX-006, BBX-007, BBX-008, BBX-009, BBX-010, BBX-011, BBX-012 | Black-box contract inventory, trace-awareness, authority, export, and non-execution test | Planned |
 | ACC-036 | PORT-006, PORT-007, PORT-008 | Non-substitution, indeterminate-result, and first-suggested-remediation test | Planned |
+| ACC-037 | REND-009 | Labeled human-only editorial-rendering test | Planned |
 | IACC-001 | INTG-001, INTG-002, INTG-004, INTG-005 | Human/agent JSON equivalence test | Planned |
 | IACC-002 | COG-002, COG-003, COG-004, COG-005 | Deterministic-only limitation and separation test | Planned |
 | IACC-003 | COG-006, COG-007, COG-008 | Proposal, inference, and evidence-truthfulness test | Planned |

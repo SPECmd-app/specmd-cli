@@ -1,7 +1,7 @@
 ---
 specmd: "0.4.2"
 specmd_optional: "0.4.2"
-spec_version: "0.11.0"
+spec_version: "0.12.0"
 status: draft
 name: "specmd Tool"
 last_updated: "2026-09-12"
@@ -316,13 +316,14 @@ flowchart TD
 ### 4.7 `specmd render`
 
 - **REND-001:** `specmd render` MUST produce a human-readable representation without changing normative meaning.
-- **REND-002:** The renderer MUST preserve heading hierarchy, requirement IDs, normative emphasis, links, code blocks, tables, and diagrams supported by the selected output format.
+- **REND-002:** The renderer MUST preserve heading hierarchy, requirement IDs, normative emphasis, links, code blocks, tables, lists, blockquotes, and diagrams supported by the selected output format.
 - **REND-003:** Human-only comments MUST be omitted from rendered output by default.
 - **REND-004:** The command MUST support HTML output.
 - **REND-005:** The command SHOULD support PDF output.
 - **REND-006:** For a Specification Set, the output MUST identify the Root Specification and each included Normative Module.
 - **REND-007:** Rendered output MUST identify the specification version and declared Core version.
 - **REND-008:** Rendering MUST NOT require remote scripts, fonts, trackers, or other network resources for basic readability.
+- **REND-009:** When `--include-human-only` produces the clearly labeled editorial rendering required by the CLI ICD, human-only content MUST be visibly distinguished from normative content in the output, not merely reproduced as the raw delimiter syntax rendered like ordinary text.
 
 ### 4.8 `specmd test`
 
@@ -550,7 +551,7 @@ Adapter filenames and installation locations depend on the selected target. Gene
 - **ACC-010 — TEST-005/006:** Given a specification containing executable code blocks, when `specmd test` runs without an explicit implementation-testing integration, then the code is not executed and the tool makes no implementation-conformance claim.
 - **ACC-011 — ADAPT-001/002/007:** Given a supported target and a valid Root Specification, when adaptation runs, then a target-appropriate adapter is generated, it identifies SPEC.md as authoritative, and the Specification Set remains byte-for-byte unchanged.
 - **ACC-012 — SAFE-003/004:** Given offline operation with all required local material, when any required command runs, then no specification content is transmitted externally.
-- **ACC-013 — REND-001/002/007:** Given a valid specification containing requirement IDs, links, tables, and code blocks, when HTML rendering completes, then those elements remain readable and the output identifies both the Core and project specification versions.
+- **ACC-013 — REND-001/002/007:** Given a valid specification containing requirement IDs, links, tables, lists, blockquotes, and code blocks, when HTML rendering completes, then those elements remain readable and the output identifies both the Core and project specification versions.
 - **ACC-014 — CLI-005/006/007:** Given a validation error in CI mode with JSON output selected, when the command exits, then it emits parseable JSON findings and a documented non-success exit status.
 - **ACC-015 — VAL-010/011:** Given a module index containing one valid relative module and one path escaping the Specification Set root, when validation runs without external-module permission, then the valid module is evaluated, the escaping path is rejected, and the overall result is not `conforming`.
 - **ACC-016 — REL-002/004:** Given an existing output artifact and a generation failure, when replacement was authorized, then the tool reports whether output exists and does not present a partial artifact as complete.
@@ -574,6 +575,7 @@ Adapter filenames and installation locations depend on the selected target. Gene
 - **ACC-034 — CLI-002/003/012/013, TRACE-006, TRACEGEN-003:** Given the Root Specification is named `spec_web.md`, when it is explicitly passed to validation and trace creation, then it receives the same processing as `SPEC.md`, the generated Trace Document declares `traces_file: "spec_web.md"`, and pair validation confirms both the file and version binding; when no input is supplied and no `SPEC.md` exists, the tool requests an explicit path rather than guessing.
 - **ACC-035 — BBX-001/002/003/004/005/006/007/008/009/010/011/012:** Given a Specification Set with incomplete input and output definitions and an optional partially populated Trace Document, when black-box analysis runs with and without TRACE, then it inventories externally observable behavior, surfaces contract gaps, keeps facts separate from inferences and proposals, reports all four completeness dimensions, treats TRACE only as coverage evidence, and neither executes nor claims runtime behavior.
 - **ACC-036 — PORT-006/007/008:** Given a Root Specification declares an exact standards version absent from every available source, when evaluation is attempted, then the operation reports `indeterminate` rather than substituting a different version, and the first suggested remediation is a proposed Specification Set version change.
+- **ACC-037 — REND-009:** Given a specification containing a well-formed human-only comment, when rendering runs with `--include-human-only`, then the human-only content is visibly distinguished from normative content in the output, and the raw delimiter syntax does not appear as ordinary rendered text.
 
 ### 7.1 Verification Methods
 
