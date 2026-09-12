@@ -1,7 +1,7 @@
 ---
 specmd_trace: "0.4.0"
 traces_file: "SPEC.md"
-traces_spec: "0.10.0"
+traces_spec: "0.11.0"
 status: draft
 name: "specmd Tool Traceability"
 last_updated: "2026-09-12"
@@ -11,7 +11,7 @@ last_updated: "2026-09-12"
 
 ## Purpose
 
-This informative companion maps the Specification Set rooted at `SPEC.md` version `0.10.0` to logical design areas and planned verification evidence.
+This informative companion maps the Specification Set rooted at `SPEC.md` version `0.11.0` to logical design areas and planned verification evidence.
 
 The normative specification remains authoritative. This document does not add, remove, or reinterpret required behavior.
 
@@ -100,9 +100,9 @@ Verification methods use:
 | ICD-CUKE-001, ICD-CUKE-002, ICD-CUKE-003, ICD-CUKE-004, ICD-CUKE-005 | Cucumber CLI routing and execution boundary | T, A | Exact target, export, no-execution, explicit-run, and trusted-config fixtures | TBD |
 | ICD-CUKE-006, ICD-CUKE-007, ICD-CUKE-008, ICD-CUKE-009, ICD-CUKE-010 | Cucumber status, import, disclosure, and process controls | T, I | Exit, trace-update, JSON, disclosure, timeout, and cancellation fixtures | TBD |
 | ICD-SRC-001, ICD-SRC-002, ICD-SRC-003, ICD-SRC-004, ICD-SRC-005, ICD-SRC-006, ICD-SRC-007 | Common standards-source CLI options | T, I | Auto, repository, local, explicit-file, offline, conflict, and provenance fixtures | TBD |
-| ICD-HELP-001, ICD-HELP-002, ICD-HELP-003, ICD-HELP-004, ICD-HELP-005, ICD-HELP-006 | Help CLI and metadata contract | T, I | Root, command, topic, offline, example-safety, and JSON fixtures | TBD |
+| ICD-HELP-001, ICD-HELP-002, ICD-HELP-003, ICD-HELP-004, ICD-HELP-005, ICD-HELP-006 | Help CLI and metadata contract | T, I | Root, command, topic, offline, example-safety, and JSON fixtures | src/specmd/commands/help.py, src/specmd/command_metadata.py (tests/test_help.py) — partial: no explicit command-syntax grammar line or example invocations shown yet |
 | ICD-STD-001, ICD-STD-002, ICD-STD-003, ICD-STD-004, ICD-STD-005 | Standards catalog, exact/latest resolver, and fetch writer | T, A | Channel, unavailable, latest, Optional compatibility, and overwrite fixtures | TBD |
-| ICD-STD-006, ICD-STD-007, ICD-STD-008, ICD-STD-009, ICD-STD-010 | Local verification, trust, privacy, version preservation, and discovery | T, I | Custom-file, trusted-config, no-project-upload, historical-version, and capability fixtures | TBD |
+| ICD-STD-006, ICD-STD-007, ICD-STD-008, ICD-STD-009, ICD-STD-010 | Local verification, trust, privacy, version preservation, and discovery | T, I | Custom-file, trusted-config, no-project-upload, historical-version, and capability fixtures | src/specmd/commands/standards.py (tests/test_standards.py) — ICD-STD-006/009 tested directly; ICD-STD-007/008 hold trivially (no network/repository code path exists at all); ICD-STD-010's standards-specific capability discovery is not separately implemented beyond the global `capabilities` command |
 | ICD-JSON-001, ICD-JSON-002, ICD-JSON-003, ICD-JSON-004 | JSON envelope and finding semantics | T, I | Schema and enum fixtures | src/specmd/envelope.py, src/specmd/findings.py (tests/test_cli_contract.py) |
 | ICD-JSON-005, ICD-JSON-006, ICD-JSON-007, ICD-JSON-008, ICD-JSON-009 | JSON writes, reviewer metadata, and forward compatibility | T, I | Write-summary, reviewer-status, disagreement, and unknown-property fixtures | TBD |
 | ICD-EXIT-001, ICD-EXIT-002, ICD-EXIT-003, ICD-EXIT-004 | Process exit status contract | T, I | Status consistency, pair result, multi-failure, and reserved-code fixtures | TBD |
@@ -115,16 +115,16 @@ Verification methods use:
 | REND-004, REND-005 | HTML and PDF renderers | T, D | Format generation and visual inspection | src/specmd/commands/render.py (tests/test_render.py; PDF explicitly unavailable, exit 4) |
 | REND-006, REND-007 | Specification Set assembler and provenance header | T, I | Modular render with version identification | TBD |
 | REND-008 | Self-contained asset policy | T, I | Offline rendered-output inspection | TBD |
-| TEST-001, TEST-002, TEST-003 | Verification coverage analyzer | T | Covered, uncovered, and orphan acceptance fixtures | TBD |
-| TEST-004 | Tool-neutral test-plan exporter | T, I | Export schema and content fixture | TBD |
-| TEST-005, TEST-006, TEST-007 | Implementation-test boundary | T, A | Non-execution, explicit-integration, and claim-label fixtures | TBD |
+| TEST-001, TEST-002, TEST-003 | Verification coverage analyzer | T | Covered, uncovered, and orphan acceptance fixtures | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
+| TEST-004 | Tool-neutral test-plan exporter | T, I | Export schema and content fixture | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
+| TEST-005, TEST-006, TEST-007 | Implementation-test boundary | T, A | Non-execution, explicit-integration, and claim-label fixtures | src/specmd/commands/coverage.py (tests/test_coverage_command.py) |
 | BBX-001, BBX-002, BBX-003, BBX-004, BBX-005 | Black-box contract analyzer | T, A | Interface inventory, gap, ambiguity, and evidence-label corpus | TBD |
-| BBX-006, BBX-007, BBX-008, BBX-009, BBX-010 | Trace-aware black-box correlator | T, I | Trace present, absent, conflicting, and four-dimension result fixtures | TBD |
-| BBX-011, BBX-012 | Black-box exporter and execution boundary | T, I | Tool-neutral export and no-runtime-execution fixtures | TBD |
-| ADAPT-001 | Adapter registry and generator | T | Supported-target generation fixtures | TBD |
-| ADAPT-002, ADAPT-003, ADAPT-004, ADAPT-005, ADAPT-006 | Canonical adapter policy | T, I | Adapter contract suite for every target | TBD |
-| ADAPT-007 | Read-only source boundary | T | Byte-for-byte source-integrity comparison | TBD |
-| ADAPT-008, ADAPT-009 | Target allowlist | T | Supported and unsupported target fixtures | TBD |
+| BBX-006, BBX-007, BBX-008, BBX-009, BBX-010 | Trace-aware black-box correlator | T, I | Trace present, absent, conflicting, and four-dimension result fixtures | src/specmd/commands/blackbox.py, src/specmd/trace_pair.py (tests/test_blackbox.py) — BBX-007 correlation is at requirement-ID granularity, not per-interface-element |
+| BBX-011, BBX-012 | Black-box exporter and execution boundary | T, I | Tool-neutral export and no-runtime-execution fixtures | src/specmd/commands/blackbox.py (tests/test_blackbox.py) |
+| ADAPT-001 | Adapter registry and generator | T | Supported-target generation fixtures | src/specmd/commands/adapt.py (tests/test_adapt.py) |
+| ADAPT-002, ADAPT-003, ADAPT-004, ADAPT-005, ADAPT-006 | Canonical adapter policy | T, I | Adapter contract suite for every target | src/specmd/commands/adapt.py (tests/test_adapt.py) |
+| ADAPT-007 | Read-only source boundary | T | Byte-for-byte source-integrity comparison | src/specmd/commands/adapt.py (tests/test_adapt.py) |
+| ADAPT-008, ADAPT-009 | Target allowlist | T | Supported and unsupported target fixtures | src/specmd/commands/adapt.py (tests/test_adapt.py) |
 | SAFE-001, SAFE-002 | Read/write operation boundary | T, A | Mutation audit and replacement-authorization fixtures | TBD |
 | SAFE-003, SAFE-004, SAFE-005 | Data-handling and redaction boundary | T, I | Network-denial, consent-display, and redaction fixtures | TBD |
 | SAFE-006 | Human-only block parser | T | Malformed and unclosed delimiter fixtures | src/specmd/human_only.py (tests/test_validate.py) |
@@ -145,7 +145,7 @@ Verification methods use:
 | CUKE-IMP-001, CUKE-IMP-002, CUKE-IMP-003, CUKE-IMP-004 | Report parser and read-only importer | T, I | Format, provenance, state, malformed-input, and source-integrity fixtures | TBD |
 | CUKE-IMP-005, CUKE-IMP-006, CUKE-IMP-007 | Authorized trace evidence updater | T, A | Exact-ID, preservation, pair-validation, and non-passing-evidence fixtures | TBD |
 | CUKE-SEC-001, CUKE-SEC-002, CUKE-SEC-003, CUKE-SEC-004, CUKE-SEC-005, CUKE-SEC-006 | Connector licensing, portability, and security boundary | T, A | Disclosure, packaging, offline, discovery, least-authority, and secret fixtures | TBD |
-| HELP-001, HELP-002, HELP-003, HELP-004 | Self-contained capability-aware help | T, I | Root, command, subcommand, safety, and availability fixtures | TBD |
+| HELP-001, HELP-002, HELP-003, HELP-004 | Self-contained capability-aware help | T, I | Root, command, subcommand, safety, and availability fixtures | src/specmd/commands/help.py, src/specmd/command_metadata.py (tests/test_help.py) — partial: no explicit command-syntax grammar line shown yet |
 | HELP-005, HELP-006, HELP-007, HELP-008 | Offline safe examples and help-schema alignment | T, I | No-external-call, hazard-label, parser parity, and JSON-schema fixtures | TBD |
 | SRC-001, SRC-002, SRC-003, SRC-004, SRC-005, SRC-006, SRC-007, SRC-008 | Standards source selector and provenance | T, A | Auto, local, directory, cache, repository, offline, no-fallback, and provenance fixtures | TBD |
 | SRC-009, SRC-010, SRC-011, SRC-012, SRC-013, SRC-014, SRC-015 | Latest, historical, withdrawn, and compatible release resolver | T, A | Catalog-channel, alias resolution, historical absence, existing-doc, init, Optional, and withdrawal fixtures | TBD |

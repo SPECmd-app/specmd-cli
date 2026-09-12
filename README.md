@@ -3,24 +3,61 @@
 A CLI for authoring, validating, inspecting, rendering, and tracing SPEC.md
 documents, implemented per the Specification Set rooted at [SPEC.md](SPEC.md).
 
-## Status: MVP subset
+## Status: intentionally partial implementation
 
-This is an initial, intentionally partial implementation. Implemented:
+Implemented:
 
 - `specmd init` — create a minimal Core or Core+Optional SPEC.md.
-- `specmd validate` — structural conformance + Trace Pair validation.
+- `specmd validate` — structural conformance + Trace Pair validation, plus
+  the Version Alignment Process (SPEC.md §4.14, PORT-006/007/008): an
+  unresolvable declared standards version always fails as `indeterminate`
+  with a proposed-spec-change remediation, never a silent substitution.
 - `specmd inspect` — read-only quality/measurement report.
 - `specmd render` — HTML rendering (PDF is not implemented; requesting it
-  returns exit status `4`).
+  returns exit status `4`). Deliberately does **not** apply the Version
+  Alignment Process — it makes no conformance claim and always displays the
+  true declared version, whatever it is.
 - `specmd trace create` / `specmd trace update` — generate and reconcile
-  `TRACE.md`.
+  `TRACE.md`; also apply the Version Alignment Process.
+- `specmd blackbox` — read-only, deterministic Black-Box Contract inventory
+  (structural only — no semantic inference, since no Cognitive Provider is
+  configured). `--export` writes a JSON report.
+- `specmd test` — verification-coverage report (covered/uncovered
+  requirement IDs, unreferenced acceptance criteria). `--export` writes a
+  JSON test plan; fields that would require semantic extraction
+  (preconditions/actions/expected outcomes) are `null`, never invented.
+  `--run-integration` is accepted but returns exit `4` — no implementation-test
+  integration is configured in this build.
+- `specmd adapt <target>` — generates a thin adapter (`codex`, `claude-code`,
+  `cursor`, `github-copilot`). Generation only; `--install` returns exit `4`.
+- `specmd standards list|show|verify` — reports only the bundled/local
+  evidence this build actually has (Core/Optional `0.4.2`); `fetch` and any
+  network/repository access are **not implemented** (SPEC.md Open Issue 1,
+  the canonical standards registry, is unresolved).
+- `specmd capabilities` — reports tool/CLI-ICD/JSON-schema versions,
+  supported standards, every command's availability, and why anything is
+  unavailable.
+- `specmd help [topic]` — real per-command help (syntax-light: see gap below),
+  `--search`, `--all` to include unavailable capabilities. Reads the same
+  static registry (`command_metadata.py`) `capabilities` does.
 - Deterministic-Only Mode (`--cognitive off|auto|required` is negotiated
   truthfully; no Cognitive Provider or Reviewer Agent is implemented).
 
-Not implemented in this pass (left `TBD`/unclaimed in [TRACE.md](TRACE.md),
-not silently assumed): `blackbox`, `test`, `adapt`, `standards`, `help`,
-`capabilities`, the Cucumber connector family, an MCP/structured-tool
-interface, Direct-Provider/Host-Agent cognitive modes, and Reviewer Agents.
+**Known gaps, disclosed rather than silently claimed:**
+- `specmd --help`/`-h` is still argparse's native (low-fidelity) output; it
+  is *not* made equivalent in information content to `specmd help` (the ICD
+  text calls for that equivalence). Use `specmd help` for the real thing.
+- `specmd help`'s per-command detail doesn't print a full command-syntax
+  grammar line or example invocations (HELP-001/HELP-005) — it lists
+  options/defaults/safety markers instead.
+- `blackbox`'s inventory is ID- and section-presence-level, not a full
+  actor/trigger/input/output/error/state-effect extraction (would need
+  semantic understanding this Deterministic-Only build doesn't have).
+
+Not implemented at all (left `TBD`/unclaimed in [TRACE.md](TRACE.md), not
+silently assumed): `standards fetch` and any network access, the Cucumber
+connector family, an MCP/structured-tool interface, Direct-Provider/Host-Agent
+cognitive modes, and Reviewer Agents.
 
 ## Important caveat: reconstructed Core/Optional profile
 

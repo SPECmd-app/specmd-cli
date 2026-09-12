@@ -1,7 +1,7 @@
 ---
 specmd: "0.4.2"
 specmd_optional: "0.4.2"
-spec_version: "0.10.0"
+spec_version: "0.11.0"
 status: draft
 name: "specmd Tool"
 last_updated: "2026-09-12"
@@ -359,7 +359,7 @@ flowchart TD
 - **ADAPT-006:** An adapter MUST NOT impose a development methodology, approval flow, implementation technology, or project structure unless the user explicitly selects an adapter profile that does so.
 - **ADAPT-007:** Adapter generation MUST NOT modify the Root Specification or its Normative Modules.
 - **ADAPT-008:** The tool MUST identify unsupported targets and MUST NOT silently substitute another target.
-- **ADAPT-009:** Initial supported targets are `codex`, `claude-code`, `cursor`, and `github-copilot`.
+- **ADAPT-009:** Initial supported targets are `codex`, `claude-code`, `cursor`, `github-copilot`, `base44`, and `lovable`.
 
 ### 4.11 Safety, Privacy, and Integrity
 

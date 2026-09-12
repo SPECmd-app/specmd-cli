@@ -42,6 +42,44 @@ def table_mapped_ids(trace_text: str) -> set[str]:
     return ids
 
 
+_PLACEHOLDER_VALUES = {"tbd", "planned", "n/a", ""}
+
+
+def row_evidence_map(trace_text: str) -> dict[str, dict[str, str]]:
+    """Best-effort id -> {"implementation": ..., "evidence": ...} map read
+    from Trace Document table rows, used by `blackbox` to distinguish
+    implementation-reference completeness from executed-evidence
+    completeness (BBX-010). Assumes the convention used throughout this
+    project's own TRACE.md and by `trace create`: the ID column is first,
+    the Implementation column is last, and when a third-or-later column
+    exists the one immediately before Implementation is evidence-like. A row
+    mapping multiple IDs (e.g. "CLI-001, CLI-002") applies the same cell
+    values to every ID in that row.
+    """
+    out: dict[str, dict[str, str]] = {}
+    for line in trace_text.splitlines():
+        stripped = line.strip()
+        if not (stripped.startswith("|") and stripped.endswith("|") and len(stripped) >= 2):
+            continue
+        cells = [c.strip() for c in stripped[1:-1].split("|")]
+        if not cells or all(_TABLE_DIVIDER_CELL_RE.match(c) for c in cells if c):
+            continue
+        if len(cells) < 2:
+            continue
+        row_ids = _MENTIONED_ID_RE.findall(cells[0])
+        if not row_ids:
+            continue
+        implementation = cells[-1]
+        evidence = cells[-2] if len(cells) >= 3 else ""
+        for rid in row_ids:
+            out[rid] = {"implementation": implementation, "evidence": evidence}
+    return out
+
+
+def is_placeholder(value: str) -> bool:
+    return value.strip().lower() in _PLACEHOLDER_VALUES
+
+
 @dataclass
 class TracePairReport:
     trace_mode: str  # "auto" | "none" | explicit path string
