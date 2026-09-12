@@ -93,6 +93,19 @@ REQUIRED_SECTIONS = (
     "Notes and Rationale",
 )
 
+# Flow identifiers (e.g. `FLW-001`) are a distinct category from requirement
+# IDs, not a subset of them, per the authoritative standard itself: Core
+# §5 "System Model" lists "behavioral flows" separately from §6
+# "Requirements" (where stable IDs are recommended, with example prefixes
+# FUN/DATA/AUTH/SEC/INT — none flow-shaped), and Optional Appendix C's
+# example trace chain treats "Flow" as its own layer between Requirement
+# and Design/Task/Implementation/Verification, not something folded into
+# requirement-ID trace coverage. TRACE-007 ("every current normative
+# requirement ID and invariant ID") therefore does not apply to these —
+# excluded here, not merely undetected, so the exclusion is explicit and
+# auditable rather than accidental. See ids.extract_flow_ids.
+FLOW_ID_PREFIXES = frozenset({"FLW"})
+
 # Optional §44's own illustrative example plus this tool's own legitimate
 # usage (optional_features is confirmed OPEN/extensible per the standard,
 # not a closed enum — see the module docstring). This set exists only to

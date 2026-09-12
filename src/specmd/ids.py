@@ -14,6 +14,12 @@ where the text after the em dash references the requirement/invariant IDs it
 covers. This is a best-effort regex extraction (TRACEGEN-005 is a SHOULD),
 not a full Markdown/requirements parser, and a document using neither
 convention will simply yield no extracted IDs rather than a guess.
+
+Flow identifiers (e.g. `FLW-001`) share the same heading shape as requirement
+IDs but are a distinct category per the authoritative standard (see
+core_profile.FLOW_ID_PREFIXES for the rationale) — extract_requirement_ids
+excludes them explicitly rather than accidentally, and extract_flow_ids
+surfaces them separately so nothing is silently dropped.
 """
 
 from __future__ import annotations
@@ -22,6 +28,7 @@ import re
 from dataclasses import dataclass, field
 
 from specmd.code_fences import strip_code_fences
+from specmd.core_profile import FLOW_ID_PREFIXES
 
 _REQUIREMENT_RE = re.compile(r"\*\*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d+):\*\*")
 _HEADING_REQUIREMENT_RE = re.compile(r"^#{1,6}\s+([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d+)\b", re.MULTILINE)
@@ -35,15 +42,33 @@ class AcceptanceEntry:
     references: list[str] = field(default_factory=list)
 
 
-def extract_requirement_ids(text: str) -> list[str]:
+def _is_flow_id(candidate: str) -> bool:
+    return candidate.split("-")[0] in FLOW_ID_PREFIXES
+
+
+def _extract_ids(text: str, *, want_flow: bool) -> list[str]:
     fenced_stripped = strip_code_fences(text)
     ids: list[str] = []
     for pattern in (_REQUIREMENT_RE, _HEADING_REQUIREMENT_RE):
         for m in pattern.finditer(fenced_stripped):
             candidate = m.group(1)
+            if _is_flow_id(candidate) != want_flow:
+                continue
             if candidate not in ids:
                 ids.append(candidate)
     return ids
+
+
+def extract_requirement_ids(text: str) -> list[str]:
+    return _extract_ids(text, want_flow=False)
+
+
+def extract_flow_ids(text: str) -> list[str]:
+    """Behavioral Flow identifiers found via the same heading/bold patterns
+    as requirement IDs, but excluded from extract_requirement_ids — see the
+    module docstring and core_profile.FLOW_ID_PREFIXES for why.
+    """
+    return _extract_ids(text, want_flow=True)
 
 
 def _expand_reference_group(group: str) -> list[str]:
