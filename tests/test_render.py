@@ -22,6 +22,41 @@ def test_render_html_creates_output(tmp_fixture, capsys):
     assert "FIX-001" in text
 
 
+def test_render_bulleted_list_becomes_real_ul(tmp_fixture, capsys):
+    d = tmp_fixture("render_markdown_elements")
+    out_html = d / "out.html"
+    _run_json(capsys, ["render", str(d / "SPEC.md"), "--output", str(out_html)])
+    text = out_html.read_text()
+    assert "<ul>" in text
+    assert "<li>First bullet item</li>" in text
+    assert "<li>Second bullet item</li>" in text
+    assert "<p>- First bullet item</p>" not in text
+
+
+def test_render_numbered_list_becomes_real_ol(tmp_fixture, capsys):
+    d = tmp_fixture("render_markdown_elements")
+    out_html = d / "out.html"
+    _run_json(capsys, ["render", str(d / "SPEC.md"), "--output", str(out_html)])
+    text = out_html.read_text()
+    assert "<ol>" in text
+    assert "<li>First numbered item</li>" in text
+    assert "<li>Second numbered item</li>" in text
+
+
+def test_render_blockquote_becomes_real_blockquote(tmp_fixture, capsys):
+    d = tmp_fixture("render_markdown_elements")
+    out_html = d / "out.html"
+    _run_json(capsys, ["render", str(d / "SPEC.md"), "--output", str(out_html)])
+    text = out_html.read_text()
+    assert "<blockquote>" in text
+    assert "A quoted note spanning" in text
+    assert "</blockquote>" in text
+    # Blockquote must close before the following regular paragraph.
+    bq_end = text.index("</blockquote>")
+    next_p = text.index("Regular paragraph after the blockquote.")
+    assert bq_end < next_p
+
+
 def test_render_pdf_unavailable(tmp_fixture, capsys):
     d = tmp_fixture("minimal_core")
     envelope, code = _run_json(capsys, ["render", str(d / "SPEC.md"), "--render-format", "pdf"])

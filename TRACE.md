@@ -111,7 +111,7 @@ Verification methods use:
 | INSP-002, INSP-003, INSP-004 | Quality analyzers | T, A | Quality-dimension corpus and heuristic review | TBD |
 | INSP-005, INSP-006, INSP-007 | Measurement and Core classifier | T | Core/non-Core size-boundary fixtures | src/specmd/structural.py, src/specmd/commands/inspect.py (tests/test_inspect.py) |
 | INSP-008 | Optional probabilistic analyzer boundary | T, I | Analyzer-present and analyzer-absent fixtures | src/specmd/cognitive.py, src/specmd/commands/inspect.py (tests/test_inspect.py) |
-| REND-001, REND-002, REND-003 | Rendering pipeline and context filter | T, I | Golden render and human-only exclusion fixtures | src/specmd/commands/render.py, src/specmd/human_only.py (tests/test_render.py) |
+| REND-001, REND-002, REND-003 | Rendering pipeline and context filter | T, I | Golden render and human-only exclusion fixtures | src/specmd/commands/render.py, src/specmd/human_only.py (tests/test_render.py) — headings, tables, links, code blocks, bulleted/numbered lists, and blockquotes all convert to real HTML elements (not just wrapped as `<p>`) |
 | REND-004, REND-005 | HTML and PDF renderers | T, D | Format generation and visual inspection | src/specmd/commands/render.py (tests/test_render.py; PDF explicitly unavailable, exit 4) |
 | REND-006, REND-007 | Specification Set assembler and provenance header | T, I | Modular render with version identification | TBD |
 | REND-008 | Self-contained asset policy | T, I | Offline rendered-output inspection | TBD |

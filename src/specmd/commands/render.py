@@ -11,6 +11,9 @@ from specmd.envelope import build_envelope
 from specmd.frontmatter import parse_document
 
 _CODE_FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
+_BULLET_RE = re.compile(r"^\s*[-*]\s+(.*)$")
+_ORDERED_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
+_BLOCKQUOTE_RE = re.compile(r"^>\s?(.*)$")
 
 
 class RenderUsageError(Exception):
@@ -19,16 +22,35 @@ class RenderUsageError(Exception):
 
 def _markdown_to_html_fragment(text: str) -> str:
     """Minimal, dependency-free Markdown->HTML good enough to preserve
-    headings, requirement-ID emphasis, links, code blocks, and tables
-    (REND-002) without pulling in a Markdown rendering dependency.
+    headings, requirement-ID emphasis, links, code blocks, tables, bulleted/
+    numbered lists, and blockquotes (REND-002) without pulling in a Markdown
+    rendering dependency. No nested-list support — a flat list per block is
+    what SPEC.md documents in practice use.
     """
     out: list[str] = []
     lines = text.splitlines()
     i = 0
     in_table = False
+    # Exactly one of these is active at a time; each holds the open tag name.
+    open_block: str | None = None  # "ul" | "ol" | "blockquote" | None
+
+    def close_block():
+        nonlocal open_block
+        if open_block is not None:
+            out.append(f"</{open_block}>")
+            open_block = None
+
+    def close_table():
+        nonlocal in_table
+        if in_table:
+            out.append("</table>")
+            in_table = False
+
     while i < len(lines):
         line = lines[i]
         if line.strip().startswith("```"):
+            close_block()
+            close_table()
             fence_lines = [line]
             i += 1
             while i < len(lines) and not lines[i].strip().startswith("```"):
@@ -43,12 +65,15 @@ def _markdown_to_html_fragment(text: str) -> str:
 
         heading_m = re.match(r"^(#{1,6})\s+(.*\S)\s*$", line)
         if heading_m:
+            close_block()
+            close_table()
             level = len(heading_m.group(1))
             out.append(f"<h{level}>{_inline(heading_m.group(2))}</h{level}>")
             i += 1
             continue
 
         if "|" in line and line.strip().startswith("|"):
+            close_block()
             if not in_table:
                 out.append("<table>")
                 in_table = True
@@ -62,8 +87,40 @@ def _markdown_to_html_fragment(text: str) -> str:
             i += 1
             continue
         elif in_table:
-            out.append("</table>")
-            in_table = False
+            close_table()
+
+        bullet_m = _BULLET_RE.match(line)
+        ordered_m = None if bullet_m else _ORDERED_RE.match(line)
+        quote_m = None if (bullet_m or ordered_m) else _BLOCKQUOTE_RE.match(line)
+
+        if bullet_m:
+            if open_block != "ul":
+                close_block()
+                out.append("<ul>")
+                open_block = "ul"
+            out.append(f"<li>{_inline(bullet_m.group(1))}</li>")
+            i += 1
+            continue
+
+        if ordered_m:
+            if open_block != "ol":
+                close_block()
+                out.append("<ol>")
+                open_block = "ol"
+            out.append(f"<li>{_inline(ordered_m.group(1))}</li>")
+            i += 1
+            continue
+
+        if quote_m:
+            if open_block != "blockquote":
+                close_block()
+                out.append("<blockquote>")
+                open_block = "blockquote"
+            out.append(f"<p>{_inline(quote_m.group(1))}</p>")
+            i += 1
+            continue
+
+        close_block()
 
         if not line.strip():
             i += 1
@@ -72,8 +129,8 @@ def _markdown_to_html_fragment(text: str) -> str:
         out.append(f"<p>{_inline(line)}</p>")
         i += 1
 
-    if in_table:
-        out.append("</table>")
+    close_block()
+    close_table()
     return "\n".join(out)
 
 
