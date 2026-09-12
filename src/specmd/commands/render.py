@@ -6,7 +6,7 @@ import html
 import re
 from pathlib import Path
 
-from specmd import exit_codes, human_only, module_resolver, writer
+from specmd import core_profile, exit_codes, human_only, module_resolver, writer
 from specmd.envelope import build_envelope
 from specmd.frontmatter import parse_document
 
@@ -14,6 +14,13 @@ _CODE_FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
 _BULLET_RE = re.compile(r"^\s*[-*]\s+(.*)$")
 _ORDERED_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
 _BLOCKQUOTE_RE = re.compile(r"^>\s?(.*)$")
+
+HUMAN_ONLY_CSS = (
+    ".specmd-human-only{border:2px solid #c0392b;background:#fdecea;"
+    "padding:.25rem 1rem;margin:1rem 0;border-radius:4px;}"
+    ".specmd-human-only-label{color:#c0392b;font-weight:bold;font-size:.75em;"
+    "text-transform:uppercase;letter-spacing:.05em;margin:.5rem 0 0 0;}"
+)
 
 
 class RenderUsageError(Exception):
@@ -26,11 +33,19 @@ def _markdown_to_html_fragment(text: str) -> str:
     numbered lists, and blockquotes (REND-002) without pulling in a Markdown
     rendering dependency. No nested-list support — a flat list per block is
     what SPEC.md documents in practice use.
+
+    Only reached with human-only markers still present when the caller kept
+    them in (--include-human-only); the default path already strips them
+    before this function ever sees the text. When present, a block is
+    wrapped and clearly labeled (ICD-CLI 8.4: "--include-human-only is
+    permitted only for a clearly labeled editorial rendering") rather than
+    left as raw delimiter text in a bare <p>.
     """
     out: list[str] = []
     lines = text.splitlines()
     i = 0
     in_table = False
+    in_human_only = False
     # Exactly one of these is active at a time; each holds the open tag name.
     open_block: str | None = None  # "ul" | "ol" | "blockquote" | None
 
@@ -61,6 +76,25 @@ def _markdown_to_html_fragment(text: str) -> str:
                 i += 1
             code = "\n".join(fence_lines[1:-1])
             out.append(f"<pre><code>{html.escape(code)}</code></pre>")
+            continue
+
+        if core_profile.HUMAN_ONLY_START in line and not in_human_only:
+            close_block()
+            close_table()
+            in_human_only = True
+            out.append(
+                '<div class="specmd-human-only">'
+                '<p class="specmd-human-only-label">Human-only comment — not part of the normative specification</p>'
+            )
+            i += 1
+            continue
+
+        if core_profile.HUMAN_ONLY_END in line and in_human_only:
+            close_block()
+            close_table()
+            in_human_only = False
+            out.append("</div>")
+            i += 1
             continue
 
         heading_m = re.match(r"^(#{1,6})\s+(.*\S)\s*$", line)
@@ -131,6 +165,10 @@ def _markdown_to_html_fragment(text: str) -> str:
 
     close_block()
     close_table()
+    if in_human_only:
+        # Malformed/unclosed block (SAFE-006 catches this at validate-time);
+        # close it here too so rendering never emits unbalanced HTML.
+        out.append("</div>")
     return "\n".join(out)
 
 
@@ -196,7 +234,8 @@ def run(
         f"<title>{title}</title>"
         "<style>body{font-family:sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem;}"
         "table{border-collapse:collapse;}td,th{border:1px solid #ccc;padding:.25rem .5rem;}"
-        ".specmd-source-label{color:#666;font-size:.85em;border-top:2px solid #ccc;padding-top:.5rem;}</style>"
+        ".specmd-source-label{color:#666;font-size:.85em;border-top:2px solid #ccc;padding-top:.5rem;}"
+        f"{HUMAN_ONLY_CSS}</style>"
         "</head><body>"
         + "".join(sections)
         + "</body></html>"

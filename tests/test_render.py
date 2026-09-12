@@ -77,6 +77,21 @@ def test_render_includes_human_only_when_requested(tmp_fixture, capsys):
     assert "EDITORS-ONLY-SECRET-MARKER" in out_html.read_text()
 
 
+def test_render_human_only_is_clearly_labeled_editorial_rendering(tmp_fixture, capsys):
+    # ICD-CLI 8.4: --include-human-only is permitted only for a "clearly
+    # labeled editorial rendering" — not just dumping the raw delimiters.
+    d = tmp_fixture("human_only_wellformed")
+    out_html = d / "out.html"
+    _run_json(capsys, ["render", str(d / "SPEC.md"), "--output", str(out_html), "--include-human-only"])
+    text = out_html.read_text()
+    assert 'class="specmd-human-only"' in text
+    assert "Human-only comment" in text
+    assert "#c0392b" in text  # red styling is present in the stylesheet
+    # The raw delimiter tokens must not appear as their own literal paragraphs.
+    assert "<p>SPECMD-HUMAN-ONLY</p>" not in text
+    assert "<p>SPECMD-END-HUMAN-ONLY</p>" not in text
+
+
 def test_render_preserves_fenced_human_only_syntax_example(tmp_fixture, capsys):
     # A documentation example that merely illustrates the human-only comment
     # syntax inside a fenced code block is not itself human-only content and
